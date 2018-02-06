@@ -150,6 +150,9 @@ public class Adventure {
      * @return true if it is valid, false if it is not
      */
     public static boolean validDirection(String userInput) {
+        if (userInput == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_DIRECTION);
+        }
         String inputLowerCase = userInput.toLowerCase();
         /*
         https://stackoverflow.com/questions/2932392/

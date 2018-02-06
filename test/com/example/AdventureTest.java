@@ -11,26 +11,24 @@ public class AdventureTest {
     }
 
     @Test
-    public void whichUserInput() {
+    public void testValidDirection() {
+        String strWithSpaces = "    go    north";
+        String goSouth = "go south";
+        String falseInput = "hello";
+
+        assertEquals(true, Adventure.validDirection(strWithSpaces));
+        assertEquals(true, Adventure.validDirection((goSouth)));
+        assertEquals(false, Adventure.validDirection(falseInput));
     }
 
     @Test
-    public void getItemsInRoom() {
-    }
-
-    @Test
-    public void getAvailableDirections() {
-    }
-
-    @Test
-    public void validDirection() {
-    }
-
-    @Test
-    public void validItemPickup() {
-    }
-
-    @Test
-    public void isValidDrop() {
+    public void nullDirection() {
+        String str = "";
+        try {
+            boolean bool = Adventure.validDirection(null);
+        } catch (IllegalArgumentException e) {
+            str = e.getMessage();
+        }
+        assertEquals("Null Input", str);
     }
 }
