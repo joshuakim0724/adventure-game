@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Adventure {
@@ -17,10 +18,15 @@ public class Adventure {
     private static boolean isFinished = false;
     private static Room[] rooms;
     private static final int OK_STATUS = 200;
+    private static final String QUIT_GAME = "quit";
+    private static final String EXIT_GAME = "exit";
+    private static ArrayList<String> carryingItems;
 
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
         Gson gson = new Gson();
+        carryingItems = new ArrayList<String>();
+        int itemIndex;
         /**
          * https://github.com/zillesc/WashingtonPost
          * https://echo360.org/lesson/G_0bf45e48-dfa7-488a-88db-4699e6468c8d_b0113c19
@@ -48,28 +54,48 @@ public class Adventure {
                     if (name.getName().equals(adventureSetup.getStartingRoom())) {
                         System.out.println(name.getDescription());
                         System.out.println("Your journey beings here");
-                        if (name.getItems().length == 0) {
-                            System.out.println("This room contains nothing");
-                        } else {
-                            System.out.print("This room contains ");
-                            for (int i = 0; i < name.getItems().length; i++) {
-                                if (i == name.getItems().length - 1) {
-                                    System.out.println(name.getItems()[i]);
+
+                        getItemsInRoom(name);
+                        getAvailableDirections(name);
+
+                        String input = scan.next().toLowerCase();
+                        /*
+                        https://stackoverflow.com/questions/2932392/
+                        java-how-to-replace-2-or-more-spaces-with-single-space-in-string-and-delete-lead
+                        Used this to learn how to remove excess spaces for my input
+                         */
+                        input = input.trim().replaceAll(" +", " ");
+
+                        if (input.equals(QUIT_GAME) || input.equals(EXIT_GAME)) {
+                            System.out.println("Exiting Game");
+                            return;
+                        }
+                        if (input.equals("list")) {
+                            System.out.print("You are carrying ");
+                            for (int k = 0; k < carryingItems.size(); k ++) {
+                                if (k == carryingItems.size()- 1) {
+                                    System.out.println(carryingItems.get(k));
                                 } else {
-                                    System.out.print(name.getItems()[i] + ", ");
+                                    System.out.print(carryingItems.get(k) + ", ");
                                 }
                             }
                         }
-
-                        System.out.print("From here, you can go: ");
-                        for (int j = 0; j < name.getDirections().length; j++) {
-                            if (j == name.getDirections().length - 1) {
-                                System.out.println(name.getDirections()[j].getDirectionName());
-                            } else if (j == name.getDirections().length - 2) {
-                                System.out.print(name.getDirections()[j].getDirectionName() + " or ");
-                            } else {
-                                System.out.print(name.getDirections()[j].getDirectionName() + ", ");
+                        if (validItemPickup(input)) {
+                            itemIndex = input.indexOf(" ") + 1;
+                            carryingItems.add(input.substring(itemIndex));
+                        }
+                        if (isValidDrop(carryingItems, input)) {
+                            itemIndex = input.indexOf(" ") + 1;
+                            carryingItems.add(input.substring(itemIndex));
+                            for (int l = 0; l < carryingItems.size(); l++) {
+                                if (carryingItems.get(l).toLowerCase().equals(input.substring(itemIndex))) {
+                                    carryingItems.remove(l);
+                                    break;
+                                }
                             }
+                        }
+                        if (validDirection((input))) {
+
                         }
                     }
                 }
@@ -79,6 +105,34 @@ public class Adventure {
             System.out.println("Network not responding");
         } catch (MalformedURLException e) {
             System.out.println("Bad URL: " + url);
+        }
+    }
+
+    public static void getItemsInRoom(Room room) {
+        if (room.getItems().length == 0) {
+            System.out.println("This room contains nothing");
+        } else {
+            System.out.print("This room contains ");
+            for (int i = 0; i < room.getItems().length; i++) {
+                if (i == room.getItems().length - 1) {
+                    System.out.println(room.getItems()[i]);
+                } else {
+                    System.out.print(room.getItems()[i] + ", ");
+                }
+            }
+        }
+    }
+
+    public static void getAvailableDirections(Room room) {
+        System.out.print("From here, you can go: ");
+        for (int j = 0; j < room.getDirections().length; j++) {
+            if (j == room.getDirections().length - 1) {
+                System.out.println(room.getDirections()[j].getDirectionName());
+            } else if (j == room.getDirections().length - 2) {
+                System.out.print(room.getDirections()[j].getDirectionName() + " or ");
+            } else {
+                System.out.print(room.getDirections()[j].getDirectionName() + ", ");
+            }
         }
     }
 
@@ -96,8 +150,8 @@ public class Adventure {
          */
         inputLowerCase = inputLowerCase.trim().replaceAll(" +", " ");
 
-        if (!inputLowerCase.contains("go")) {
-            System.out.println("Please remember to put the word 'go' before the direction");
+        if (!inputLowerCase.contains("go ")) {
+//            System.out.println("Please remember to put the word 'go' before the direction");
             return false;
         }
         //Note this part only works since I hard coded the options from the file
@@ -122,8 +176,8 @@ public class Adventure {
         //See comment in validDirection
         inputLowerCase = inputLowerCase.trim().replaceAll(" +", " ");
 
-        if (!inputLowerCase.contains("take")) {
-            System.out.println("Please remember to put the word 'take' before the item");
+        if (!inputLowerCase.contains("take ")) {
+//            System.out.println("Please remember to put the word 'take' before the item");
             return false;
         }
         //Note this part only works since I hard coded the options from the file
@@ -139,19 +193,35 @@ public class Adventure {
         }
     }
 
-    //Don't actually use this, but have this to reference Zillecs code that he showed
-    static void makeApiRequest(String url) throws UnirestException, MalformedURLException {
-        final HttpResponse<String> stringHttpResponse;
+    public static boolean isValidDrop(ArrayList<String> list, String input) {
+        input = input.toLowerCase().trim().replaceAll(" +", " ");
 
-        // This will throw MalformedURLException if the url is malformed.
-        new URL(AdventureURL.JSON_LINK);
-
-        stringHttpResponse = Unirest.get(url).asString();
-        // Check to see if the request was successful; if so, convert the payload JSON into Java objects
-        if (stringHttpResponse.getStatus() == 200) {
-            String json = stringHttpResponse.getBody();
-            Gson gson = new Gson();
-            final AdventureSetup adventureSetup = gson.fromJson(json, AdventureSetup.class);
+        if(!input.contains("take ")) {
+            return false;
         }
+        int itemIndex = input.indexOf(" ") + 1;
+        String newInput = input.substring(itemIndex);
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).toLowerCase().equals(newInput)) {
+                return true;
+            }
+        }
+        System.out.println("I can't drop " + input);
+        return false;
     }
+    //Don't actually use this, but have this to reference Zillecs code that he showed
+//    static void makeApiRequest(String url) throws UnirestException, MalformedURLException {
+//        final HttpResponse<String> stringHttpResponse;
+//
+//        // This will throw MalformedURLException if the url is malformed.
+//        new URL(AdventureURL.JSON_LINK);
+//
+//        stringHttpResponse = Unirest.get(url).asString();
+//        // Check to see if the request was successful; if so, convert the payload JSON into Java objects
+//        if (stringHttpResponse.getStatus() == 200) {
+//            String json = stringHttpResponse.getBody();
+//            Gson gson = new Gson();
+//            final AdventureSetup adventureSetup = gson.fromJson(json, AdventureSetup.class);
+//        }
+//    }
 }
