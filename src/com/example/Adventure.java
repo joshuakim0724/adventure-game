@@ -5,7 +5,6 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -162,7 +161,6 @@ public class Adventure {
         inputLowerCase = inputLowerCase.trim().replaceAll(" +", " ");
 
         if (!inputLowerCase.contains("go ")) {
-//            System.out.println("Please remember to put the word 'go' before the direction");
             return false;
         }
         //Note this part only works since I hard coded the options from the file
@@ -183,15 +181,18 @@ public class Adventure {
      * @return true if it is valid, false if it is not
      */
     public static boolean validItemPickup(String userInput) {
+        if (userInput == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_ITEM);
+        }
         String inputLowerCase = userInput.toLowerCase();
         //See comment in validDirection
         inputLowerCase = inputLowerCase.trim().replaceAll(" +", " ");
 
         if (!inputLowerCase.contains("take ")) {
-//            System.out.println("Please remember to put the word 'take' before the item");
             return false;
         }
         //Note this part only works since I hard coded the options from the file
+        //If it is a different file need to change this
         if (inputLowerCase.equals("take coin") || inputLowerCase.equals("take sweatshirt") ||
                 inputLowerCase.equals("take key") || inputLowerCase.equals("take pizza") ||
                 inputLowerCase.equals("take usb-c connector") ||
@@ -204,20 +205,27 @@ public class Adventure {
         }
     }
 
-    public static boolean isValidDrop(ArrayList<String> list, String input) {
-        input = input.toLowerCase().trim().replaceAll(" +", " ");
+    public static boolean isValidDrop(ArrayList<String> list, String userInput) {
+        if (userInput == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_DROP);
+        }
+        if (list == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_ARRAY);
 
-        if(!input.contains("take ")) {
+        }
+        userInput = userInput.toLowerCase().trim().replaceAll(" +", " ");
+
+        if(!userInput.contains("drop ")) {
             return false;
         }
-        int itemIndex = input.indexOf(" ") + 1;
-        String newInput = input.substring(itemIndex);
+        int itemIndex = userInput.indexOf(" ") + 1;
+        String newInput = userInput.substring(itemIndex);
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i).toLowerCase().equals(newInput)) {
                 return true;
             }
         }
-        System.out.println("I can't drop " + input);
+        System.out.println("I can't drop " + userInput);
         return false;
     }
     //Don't actually use this, but have this to reference Zillecs code that he showed
