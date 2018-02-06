@@ -16,7 +16,7 @@ public class Adventure {
     private static AdventureSetup adventureSetup;
     private static boolean isFinished = false;
     private static Room[] rooms;
-
+    private static final int OK_STATUS = 200;
 
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
@@ -37,11 +37,11 @@ public class Adventure {
 
             stringHttpResponse = Unirest.get(AdventureURL.JSON_LINK).asString();
             // Check to see if the request was successful; if so, convert the payload JSON into Java objects
+            if (stringHttpResponse.getStatus() == OK_STATUS) {
+                String json = stringHttpResponse.getBody();
+                AdventureSetup adventureSetup = gson.fromJson(json, AdventureSetup.class);
 
-            String json = stringHttpResponse.getBody();
-            AdventureSetup adventureSetup = gson.fromJson(json, AdventureSetup.class);
-
-            //while (!isFinished) {
+//                while (!isFinished) {
                 System.out.println("Your starting room is: " + adventureSetup.getStartingRoom());
                 rooms = adventureSetup.getRooms();
                 for (Room name : rooms) {
@@ -60,9 +60,20 @@ public class Adventure {
                                 }
                             }
                         }
+
+                        System.out.print("From here, you can go: ");
+                        for (int j = 0; j < name.getDirections().length; j++) {
+                            if (j == name.getDirections().length - 1) {
+                                System.out.println(name.getDirections()[j].getDirectionName());
+                            } else if (j == name.getDirections().length - 2) {
+                                System.out.print(name.getDirections()[j].getDirectionName() + " or ");
+                            } else {
+                                System.out.print(name.getDirections()[j].getDirectionName() + ", ");
+                            }
+                        }
                     }
                 }
-
+            }
         } catch (UnirestException e) {
             e.printStackTrace();
             System.out.println("Network not responding");
@@ -70,6 +81,64 @@ public class Adventure {
             System.out.println("Bad URL: " + url);
         }
     }
+
+    /**
+     * This method makes sure the direction is a valid direction
+     * @param userInput This is the String input that the user will enter into the scanner
+     * @return true if it is valid, false if it is not
+     */
+    public static boolean validDirection(String userInput) {
+        String inputLowerCase = userInput.toLowerCase();
+        /*
+        https://stackoverflow.com/questions/2932392/
+        java-how-to-replace-2-or-more-spaces-with-single-space-in-string-and-delete-lead
+        Used this to learn how to remove excess spaces for my input
+         */
+        inputLowerCase = inputLowerCase.trim().replaceAll(" +", " ");
+
+        if (!inputLowerCase.contains("go")) {
+            System.out.println("Please remember to put the word 'go' before the direction");
+            return false;
+        }
+        //Note this part only works since I hard coded the options from the file
+        if (inputLowerCase.equals("go north") || inputLowerCase.equals("go east") ||
+                inputLowerCase.equals("go south") || inputLowerCase.equals("go west") ||
+                inputLowerCase.equals("go northeast") ||
+                inputLowerCase.equals("go up") || inputLowerCase.equals("go down")) {
+            return true;
+        } else {
+            System.out.println("I can't go " + userInput);
+            return false;
+        }
+    }
+
+    /** +
+     * This method makes sure the item is a valid pickup
+     * @param userInput This is the String input that the user will enter into the scanner
+     * @return true if it is valid, false if it is not
+     */
+    public static boolean validItemPickup(String userInput) {
+        String inputLowerCase = userInput.toLowerCase();
+        //See comment in validDirection
+        inputLowerCase = inputLowerCase.trim().replaceAll(" +", " ");
+
+        if (!inputLowerCase.contains("take")) {
+            System.out.println("Please remember to put the word 'take' before the item");
+            return false;
+        }
+        //Note this part only works since I hard coded the options from the file
+        if (inputLowerCase.equals("take coin") || inputLowerCase.equals("take sweatshirt") ||
+                inputLowerCase.equals("take key") || inputLowerCase.equals("take pizza") ||
+                inputLowerCase.equals("take usb-c connector") ||
+                inputLowerCase.equals("take grading rubric") || inputLowerCase.equals("take bagel") ||
+                inputLowerCase.equals("take coffee") || inputLowerCase.equals("take pencil")) {
+            return true;
+        } else {
+            System.out.println("I can't take " + userInput);
+            return false;
+        }
+    }
+
     //Don't actually use this, but have this to reference Zillecs code that he showed
     static void makeApiRequest(String url) throws UnirestException, MalformedURLException {
         final HttpResponse<String> stringHttpResponse;
