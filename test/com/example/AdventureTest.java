@@ -57,7 +57,7 @@ public class AdventureTest {
         } catch (IllegalArgumentException e) {
             str = e.getMessage();
         }
-        assertEquals("Null Item", str);
+        assertEquals("Null Item Input", str);
     }
 
     @Test
@@ -87,7 +87,7 @@ public class AdventureTest {
         } catch (IllegalArgumentException e) {
             str = e.getMessage();
         }
-        assertEquals("Null Drop", str);
+        assertEquals("Null Drop Input", str);
     }
 
     @Test
@@ -98,6 +98,6 @@ public class AdventureTest {
         } catch (IllegalArgumentException e) {
             str = e.getMessage();
         }
-        assertEquals("Null Array", str);
+        assertEquals("Null Array Input", str);
     }
 }

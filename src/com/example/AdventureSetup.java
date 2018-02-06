@@ -10,6 +10,10 @@ public class AdventureSetup {
         return startingRoom;
     }
 
+    public void setStartingRoom(String room) {
+        startingRoom = room;
+    }
+
     public String getEndingRoom() {
         return endingRoom;
     }
