@@ -20,13 +20,13 @@ public class Adventure {
     private static final int OK_STATUS = 200;
     private static final String QUIT_GAME = "quit";
     private static final String EXIT_GAME = "exit";
-    private static ArrayList<String> carryingItems;
+    private static ArrayList<String> carryingItems = new ArrayList<String>();
+    private static int itemIndex;
+
 
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
         Gson gson = new Gson();
-        carryingItems = new ArrayList<String>();
-        int itemIndex;
         /**
          * https://github.com/zillesc/WashingtonPost
          * https://echo360.org/lesson/G_0bf45e48-dfa7-488a-88db-4699e6468c8d_b0113c19
@@ -80,23 +80,7 @@ public class Adventure {
                                 }
                             }
                         }
-                        if (validItemPickup(input)) {
-                            itemIndex = input.indexOf(" ") + 1;
-                            carryingItems.add(input.substring(itemIndex));
-                        }
-                        if (isValidDrop(carryingItems, input)) {
-                            itemIndex = input.indexOf(" ") + 1;
-                            carryingItems.add(input.substring(itemIndex));
-                            for (int l = 0; l < carryingItems.size(); l++) {
-                                if (carryingItems.get(l).toLowerCase().equals(input.substring(itemIndex))) {
-                                    carryingItems.remove(l);
-                                    break;
-                                }
-                            }
-                        }
-                        if (validDirection((input))) {
-
-                        }
+                        whichUserInput(input);
                     }
                 }
             }
@@ -108,6 +92,30 @@ public class Adventure {
         }
     }
 
+    public static void whichUserInput(String input) {
+        input = input.toLowerCase();
+        if (input.contains("take ")) {
+            if (validItemPickup(input)) {
+                itemIndex = input.indexOf(" ") + 1;
+                carryingItems.add(input.substring(itemIndex));
+            }
+        }
+        if (input.contains("drop ")) {
+            if (isValidDrop(carryingItems, input)) {
+                itemIndex = input.indexOf(" ") + 1;
+                carryingItems.add(input.substring(itemIndex));
+                for (int l = 0; l < carryingItems.size(); l++) {
+                    if (carryingItems.get(l).toLowerCase().equals(input.substring(itemIndex))) {
+                        carryingItems.remove(l);
+                        break;
+                    }
+                }
+            }
+        }
+        if (input.contains("go ")) {
+
+        }
+    }
     public static void getItemsInRoom(Room room) {
         if (room.getItems().length == 0) {
             System.out.println("This room contains nothing");
