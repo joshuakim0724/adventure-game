@@ -26,13 +26,23 @@ public class Room {
     }
 
     public void addItem(String userInput) {
+        boolean wasAdded = false;
         if (userInput == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_ITEM);
         }
         //https://stackoverflow.com/questions/157944/create-arraylist-from-array
         //Converted Array to an ArrayList
         itemsList = new ArrayList<String>(Arrays.asList(items));
-        itemsList.add(userInput);
+        for (int j = 0; j < itemsList.size(); j++) {
+            if (itemsList.get(j) == null) {
+                itemsList.set(j, userInput);
+                wasAdded = true;
+                break;
+            }
+        }
+        if (!wasAdded) {
+            itemsList.add(userInput);
+        }
         //https://stackoverflow.com/questions/9929321/converting-arraylist-to-array-in-java
         //Converted ArrayList back to an Array
         itemsList.toArray(items);

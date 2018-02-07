@@ -1,12 +1,49 @@
 package com.example;
 
+import com.google.gson.Gson;
+
+import java.net.URL;
 import java.util.ArrayList;
 
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class AdventureTest {
+    public static final String SIBEL = "{\n" +
+            "  \"startingRoom\": \"MatthewsStreet\",\n" +
+            "  \"endingRoom\": \"Siebel1314\",\n" +
+            "  \"rooms\": [\n" +
+            "    {\n" +
+            "      \"name\": \"MatthewsStreet\",\n" +
+            "      \"description\": \"You are on Matthews, outside the Siebel Center\",\n" +
+            "      \"items\": [\"coin\"],\n" +
+            "      \"directions\": [\n" +
+            "        {\n" +
+            "          \"directionName\": \"East\",\n" +
+            "          \"room\": \"SiebelEntry\"\n" +
+            "        }\n" +
+            "      ]\n" +
+            "    }";
+    private AdventureSetup setup;
+    private Room[] room;
+
+    @Before
+    public void setUp() throws Exception {
+        Gson gson = new Gson();
+
+        final HttpResponse<String> stringHttpResponse;
+
+        URL url = new URL(AdventureURL.JSON_LINK);
+
+        stringHttpResponse = Unirest.get(AdventureURL.JSON_LINK).asString();
+        String json = stringHttpResponse.getBody();
+        setup = gson.fromJson(json, AdventureSetup.class);
+        room = setup.getRooms();
+    }
 
     @Test
     public void main() {
@@ -14,22 +51,20 @@ public class AdventureTest {
 
     @Test
     public void testValidDirection() {
-        String strWithSpaces = "    go    north";
-        String goSouth = "go south";
-        String caseTest = "gO nOrThEaSt";
-        String falseInput = "hello";
+        String strWithSpaces = "    go    east";
+        String caseTest = "gO eAsT";
+        String falseInput = "south";
 
-        assertEquals(true, Adventure.validDirection(strWithSpaces));
-        assertEquals(true, Adventure.validDirection((goSouth)));
-        assertEquals(true, Adventure.validDirection(caseTest));
-        assertEquals(false, Adventure.validDirection(falseInput));
+        assertEquals(true, Adventure.validDirection(strWithSpaces, room[0]));
+        assertEquals(true, Adventure.validDirection(caseTest, room[0]));
+        assertEquals(false, Adventure.validDirection(falseInput, room[0]));
     }
 
     @Test
     public void nullDirection() {
         String str = "";
         try {
-            boolean bool = Adventure.validDirection(null);
+            boolean bool = Adventure.validDirection(null, null);
         } catch (IllegalArgumentException e) {
             str = e.getMessage();
         }
@@ -43,17 +78,17 @@ public class AdventureTest {
         String caseTest = "tAkE coFfEe";
         String falseInput = "nothing";
 
-        assertEquals(true, Adventure.validItemPickup(normalInput));
-        assertEquals(true, Adventure.validItemPickup(strWithSpaces));
-        assertEquals(true, Adventure.validItemPickup((caseTest)));
-        assertEquals(false, Adventure.validItemPickup(falseInput));
+        assertEquals(true, Adventure.validItemPickup(normalInput, room[0]));
+        assertEquals(true, Adventure.validItemPickup(strWithSpaces, room[7]));
+        assertEquals(true, Adventure.validItemPickup(caseTest, room[5]));
+        assertEquals(false, Adventure.validItemPickup(falseInput, room[0]));
     }
 
     @Test
     public void nullItem() {
         String str = "";
         try {
-            boolean bool = Adventure.validItemPickup(null);
+            boolean bool = Adventure.validItemPickup(null, null);
         } catch (IllegalArgumentException e) {
             str = e.getMessage();
         }
@@ -94,7 +129,7 @@ public class AdventureTest {
     public void nullArrayDrop() {
         String str = "";
         try {
-            boolean bool = Adventure.isValidDrop(null,str);
+            boolean bool = Adventure.isValidDrop(null, str);
         } catch (IllegalArgumentException e) {
             str = e.getMessage();
         }
