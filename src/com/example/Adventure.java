@@ -93,7 +93,8 @@ public class Adventure {
                                     }
                                 }
                             }
-                            if (input.contains("take ")) {
+                            //Allowing steal input :)
+                            if (input.contains("take ") || input.contains("steal ")) {
                                 if (validItemPickup(originalInput, room)) {
                                     itemIndex = input.indexOf(" ") + 1;
                                     carryingItems.add(input.substring(itemIndex));
@@ -112,7 +113,8 @@ public class Adventure {
                                     }
                                 }
                             }
-                            if (input.contains("go ")) {
+                            //Allowing walk and run inputs for optional features
+                            if (input.contains("go ") || input.contains("walk ") || input.contains("run ")) {
                                 if (validDirection(originalInput, room)) {
                                     itemIndex = input.indexOf(" ") + 1;
                                     String directionInput = input.substring(itemIndex);
@@ -218,7 +220,9 @@ public class Adventure {
         itemIndex = inputLowerCase.indexOf(" ") + 1;
         String directionInput = inputLowerCase.substring(itemIndex);
 
-        if (!inputLowerCase.contains("go ")) {
+        //For optional features, allowing run and walk inputs
+        if (!inputLowerCase.contains("go ") && !inputLowerCase.contains("run ") &&
+                !inputLowerCase.contains("walk ")) {
             return false;
         }
         for (int i = 0; i < room.getDirections().length; i++) {
@@ -249,7 +253,7 @@ public class Adventure {
         itemIndex = inputLowerCase.indexOf(" ") + 1;
         String itemInput = inputLowerCase.substring(itemIndex);
 
-        if (!inputLowerCase.contains("take ")) {
+        if (!inputLowerCase.contains("take ") && !inputLowerCase.contains("steal ")) {
             return false;
         }
         for (int i = 0; i < room.getItems().length; i++) {
