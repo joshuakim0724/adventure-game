@@ -14,14 +14,16 @@ import java.util.Scanner;
 public class Adventure {
     private static URL url;
     private static AdventureSetup adventureSetup;
-    private static boolean isFinished = false;
-    private static boolean passedFirstRoom = false;
-    private static Room[] rooms;
+
     private static final int OK_STATUS = 200;
     private static final String QUIT_GAME = "quit";
     private static final String EXIT_GAME = "exit";
-    private static ArrayList<String> carryingItems;
+
     private static int itemIndex;
+    private static boolean isFinished = false;
+    private static boolean passedFirstRoom = false;
+    private static ArrayList<String> carryingItems;
+    private static Room[] rooms;
 
     //Main method that will run the actual game
 
@@ -29,14 +31,14 @@ public class Adventure {
         Scanner scan = new Scanner(System.in);
         Gson gson = new Gson();
         carryingItems = new ArrayList<String>();
-        /**
-         * https://github.com/zillesc/WashingtonPost
-         * https://echo360.org/lesson/G_0bf45e48-dfa7-488a-88db-4699e6468c8d_b0113c19
-         * -4871-4da9-bad8-9a5f6b017a2f_2018-02-01T12:30:00.000_2018-02-01T13:57:00.000/classroom#sortDirection=desc
-         * Classroom video link
-         * Looked at the lecture in class to figure out how to get a Json from a URL
-         *
-         * //https://stackoverflow.com/questions/31504123/unhandled-exception-java-net-malformedurlexception
+        /*
+          https://github.com/zillesc/WashingtonPost
+          https://echo360.org/lesson/G_0bf45e48-dfa7-488a-88db-4699e6468c8d_b0113c19
+          -4871-4da9-bad8-9a5f6b017a2f_2018-02-01T12:30:00.000_2018-02-01T13:57:00.000/classroom#sortDirection=desc
+          Classroom video link
+          Looked at the lecture in class to figure out how to get a Json from a URL
+
+          //https://stackoverflow.com/questions/31504123/unhandled-exception-java-net-malformedurlexception
          */
         try {
             final HttpResponse<String> stringHttpResponse;
@@ -48,7 +50,7 @@ public class Adventure {
             if (stringHttpResponse.getStatus() == OK_STATUS) {
                 String json = stringHttpResponse.getBody();
                 AdventureSetup adventureSetup = gson.fromJson(json, AdventureSetup.class);
-
+                String orginalStartingRoom = adventureSetup.getStartingRoom();
                 while (!isFinished) {
                     if (!passedFirstRoom) {
                         System.out.println("Your starting room is: " + adventureSetup.getStartingRoom());
@@ -133,7 +135,7 @@ public class Adventure {
                     }
                     if (adventureSetup.getEndingRoom().equals(adventureSetup.getStartingRoom())) {
                         isFinished = true;
-                        System.out.println("You reached the end room!");
+                        System.out.println("You have reached your final destination!");
                     }
                     System.out.println(); //To separate the paragraphs of text
                 }
@@ -150,9 +152,9 @@ public class Adventure {
      * This method prints out all the items available in the room
      * @param room is the room you are getting the items from
      */
-    public static void getItemsInRoom(Room room) {
+    private static void getItemsInRoom(Room room) {
         boolean allValuesNull = true;
-        if (room.getItems().length == 0) {
+        if (room.getItems() == null || room.getItems().length == 0) {
             System.out.println("This room contains nothing");
         } else {
             System.out.print("This room contains ");
@@ -170,7 +172,6 @@ public class Adventure {
                         }
                     }
                 }
-
             }
             if (allValuesNull) {
                 System.out.println("nothing");
@@ -182,7 +183,7 @@ public class Adventure {
      * This method prints out all the directions available from the room
      * @param room is the room you are getting available directions from
      */
-    public static void getAvailableDirections(Room room) {
+    private static void getAvailableDirections(Room room) {
         System.out.print("From here, you can go: ");
         for (int j = 0; j < room.getDirections().length; j++) {
             if (j == room.getDirections().length - 1) {
@@ -282,8 +283,8 @@ public class Adventure {
         }
         int itemIndex = userInput.indexOf(" ") + 1;
         String newInput = userInput.substring(itemIndex);
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).equalsIgnoreCase(newInput)) {
+        for (String aList : list) {
+            if (aList.equalsIgnoreCase(newInput)) {
                 return true;
             }
         }

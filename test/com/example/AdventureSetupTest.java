@@ -69,6 +69,30 @@ public class AdventureSetupTest {
     }
 
     @Test
+    public void addItemTest() {
+        Room room3 = rooms[2];
+        Room room8 = rooms[7];
+
+        room3.addItem("pencil");
+        assertEquals("pencil", room3.getItems()[2]);
+
+        room8.addItem("swag");
+        assertEquals("swag", room8.getItems()[1]);
+    }
+
+    @Test
+    public void addNullItem() {
+        Room room3 = rooms[2];
+        String str = "";
+        try {
+            room3.addItem(null);
+        } catch (IllegalArgumentException e) {
+            str = e.getMessage();
+        }
+        assertEquals("Null Item Input", str);
+    }
+
+    @Test
     public void removeItemTest() {
         Room room3 = rooms[2];
         Room room8 = rooms[7];
@@ -78,6 +102,18 @@ public class AdventureSetupTest {
 
         room8.removeItem("pencil");
         assertEquals(null, room8.getItems()[0]);
+    }
+
+    @Test
+    public void dropNullItem() {
+        Room room3 = rooms[2];
+        String str = "";
+        try {
+            room3.removeItem(null);
+        } catch (IllegalArgumentException e) {
+            str = e.getMessage();
+        }
+        assertEquals("Null Drop Input", str);
     }
 
     //Testing Direction Class below

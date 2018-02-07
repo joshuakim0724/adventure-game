@@ -25,6 +25,10 @@ public class Room {
         return items;
     }
 
+    /**
+     * This method will add an item to the Item List
+     * @param userInput This is the String input user will enter for which item to add
+     */
     public void addItem(String userInput) {
         boolean wasAdded = false;
         if (userInput == null) {
@@ -49,6 +53,10 @@ public class Room {
         items = itemsList.toArray(new String[itemsList.size()]);
     }
 
+    /**
+     * This method will remove an item from the Item List
+     * @param userInput This is the String input user will enter for which item to remove
+     */
     public void removeItem(String userInput) {
         if (userInput == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_DROP);
@@ -60,6 +68,6 @@ public class Room {
                 break;
             }
         }
-        items = itemsList.toArray(new String[itemsList.size()]);
+        itemsList.toArray(items);
     }
 }
