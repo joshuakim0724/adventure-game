@@ -43,9 +43,10 @@ public class Room {
         if (!wasAdded) {
             itemsList.add(userInput);
         }
+
         //https://stackoverflow.com/questions/9929321/converting-arraylist-to-array-in-java
         //Converted ArrayList back to an Array
-        itemsList.toArray(items);
+        items = itemsList.toArray(new String[itemsList.size()]);
     }
 
     public void removeItem(String userInput) {
@@ -59,6 +60,6 @@ public class Room {
                 break;
             }
         }
-        itemsList.toArray(items);
+        items = itemsList.toArray(new String[itemsList.size()]);
     }
 }

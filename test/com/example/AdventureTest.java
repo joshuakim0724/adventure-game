@@ -13,21 +13,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class AdventureTest {
-    public static final String SIBEL = "{\n" +
-            "  \"startingRoom\": \"MatthewsStreet\",\n" +
-            "  \"endingRoom\": \"Siebel1314\",\n" +
-            "  \"rooms\": [\n" +
-            "    {\n" +
-            "      \"name\": \"MatthewsStreet\",\n" +
-            "      \"description\": \"You are on Matthews, outside the Siebel Center\",\n" +
-            "      \"items\": [\"coin\"],\n" +
-            "      \"directions\": [\n" +
-            "        {\n" +
-            "          \"directionName\": \"East\",\n" +
-            "          \"room\": \"SiebelEntry\"\n" +
-            "        }\n" +
-            "      ]\n" +
-            "    }";
+
     private AdventureSetup setup;
     private Room[] room;
 
@@ -61,14 +47,25 @@ public class AdventureTest {
     }
 
     @Test
-    public void nullDirection() {
+    public void nullInputDirection() {
         String str = "";
         try {
-            boolean bool = Adventure.validDirection(null, null);
+            boolean bool = Adventure.validDirection(null, room[0]);
         } catch (IllegalArgumentException e) {
             str = e.getMessage();
         }
-        assertEquals("Null Direction", str);
+        assertEquals("Null Direction Input", str);
+    }
+
+    @Test
+    public void nullRoomDirection() {
+        String str = "";
+        try {
+            boolean bool = Adventure.validDirection("go east", null);
+        } catch (IllegalArgumentException e) {
+            str = e.getMessage();
+        }
+        assertEquals("Null Room Input", str);
     }
 
     @Test
@@ -85,14 +82,25 @@ public class AdventureTest {
     }
 
     @Test
-    public void nullItem() {
+    public void nullInputItem() {
         String str = "";
         try {
-            boolean bool = Adventure.validItemPickup(null, null);
+            boolean bool = Adventure.validItemPickup(null, room[0]);
         } catch (IllegalArgumentException e) {
             str = e.getMessage();
         }
         assertEquals("Null Item Input", str);
+    }
+
+    @Test
+    public void nullRoomItem() {
+        String str = "";
+        try {
+            boolean bool = Adventure.validItemPickup("take pencil", null);
+        } catch (IllegalArgumentException e) {
+            str = e.getMessage();
+        }
+        assertEquals("Null Room Input", str);
     }
 
     @Test

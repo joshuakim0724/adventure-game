@@ -1,20 +1,97 @@
 package com.example;
 
+import com.google.gson.Gson;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.net.URL;
 
 import static org.junit.Assert.*;
 
 public class AdventureSetupTest {
+    private AdventureSetup setup;
+    private Room[] rooms;
 
-    @Test
-    public void getStartingRoom() {
+    @Before
+    public void setUp() throws Exception {
+        Gson gson = new Gson();
+
+        final HttpResponse<String> stringHttpResponse;
+
+        URL url = new URL(AdventureURL.JSON_LINK);
+
+        stringHttpResponse = Unirest.get(AdventureURL.JSON_LINK).asString();
+        String json = stringHttpResponse.getBody();
+
+        setup = gson.fromJson(json, AdventureSetup.class);
+        rooms = setup.getRooms();
     }
 
     @Test
-    public void getEndingRoom() {
+    public void getStartingRoomTest() {
+        assertEquals("MatthewsStreet", setup.getStartingRoom());
     }
 
     @Test
-    public void getRooms() {
+    public void setStartingRoomTest() {
+        setup.setStartingRoom("SiebelEntry");
+
+        assertEquals("SiebelEntry", setup.getStartingRoom());
+
+        setup.setStartingRoom("MatthewsStreet"); //Returning back to original so doesn't affect the class
+        assertEquals("MatthewsStreet", setup.getStartingRoom());
+    }
+
+    @Test
+    public void getEndingRoomTest() {
+        assertEquals("Siebel1314", setup.getEndingRoom());
+    }
+
+    //Testing Room class below
+
+    @Test
+    public void roomTest() {
+        Room room3 = rooms[2];
+        Room room8 = rooms[7];
+
+        assertEquals("AcmOffice", room3.getName());
+        assertEquals("You are in the ACM office.  " +
+                "There are lots of friendly ACM people.", room3.getDescription());
+        assertEquals("pizza", room3.getItems()[0]);
+        assertEquals("swag", room3.getItems()[1]);
+
+        assertEquals("SiebelBasement", room8.getName());
+        assertEquals("You are in the basement of Siebel.  " +
+                "You see tables with students working and door to computer labs.", room8.getDescription());
+        assertEquals("pencil", room8.getItems()[0]);
+    }
+
+    @Test
+    public void removeItemTest() {
+        Room room3 = rooms[2];
+        Room room8 = rooms[7];
+
+        room3.removeItem("swag");
+        assertEquals(null, room3.getItems()[1]);
+
+        room8.removeItem("pencil");
+        assertEquals(null, room8.getItems()[0]);
+    }
+
+    //Testing Direction Class below
+
+    @Test
+    public void testDirectionName() {
+        Room room4 = rooms[3];
+        Direction direction1 = room4.getDirections()[0];
+        Direction direction2 = room4.getDirections()[1];
+
+        assertEquals("South", direction1.getDirectionName());
+        assertEquals("SiebelEntry", direction1.getRoom());
+
+        assertEquals("NorthEast", direction2.getDirectionName());
+        assertEquals("Siebel1112", direction2.getRoom());
     }
 }

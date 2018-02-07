@@ -23,6 +23,7 @@ public class Adventure {
     private static ArrayList<String> carryingItems;
     private static int itemIndex;
 
+    //Main method that will run the actual game
 
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
@@ -49,7 +50,9 @@ public class Adventure {
                 AdventureSetup adventureSetup = gson.fromJson(json, AdventureSetup.class);
 
                 while (!isFinished) {
-                    System.out.println("Your starting room is: " + adventureSetup.getStartingRoom());
+                    if (!passedFirstRoom) {
+                        System.out.println("Your starting room is: " + adventureSetup.getStartingRoom());
+                    }
                     rooms = adventureSetup.getRooms();
                     for (Room room : rooms) {
                         if (room.getName().equals(adventureSetup.getStartingRoom())) {
@@ -57,18 +60,20 @@ public class Adventure {
                             if (!passedFirstRoom) {
                                 System.out.println("Your journey beings here");
                             }
-                            passedFirstRoom = true;
                             getItemsInRoom(room);
                             getAvailableDirections(room);
+                            passedFirstRoom = true;
 
-                            String input = scan.nextLine().toLowerCase();
+
+                            String originalInput = scan.nextLine();
+                            String input = originalInput.toLowerCase();
                         /*
                         https://stackoverflow.com/questions/2932392/
                         java-how-to-replace-2-or-more-spaces-with-single-space-in-string-and-delete-lead
                         Used this to learn how to remove excess spaces for my input
                          */
                             input = input.trim().replaceAll(" +", " ");
-                            System.out.println(input);
+
                             if (input.equals(QUIT_GAME) || input.equals(EXIT_GAME)) {
                                 System.out.println("Exiting Game");
                                 return;
@@ -87,14 +92,14 @@ public class Adventure {
                                 }
                             }
                             if (input.contains("take ")) {
-                                if (validItemPickup(input, room)) {
+                                if (validItemPickup(originalInput, room)) {
                                     itemIndex = input.indexOf(" ") + 1;
                                     carryingItems.add(input.substring(itemIndex));
                                     room.removeItem(input.substring(itemIndex));
                                 }
                             }
                             if (input.contains("drop ")) {
-                                if (isValidDrop(carryingItems, input)) {
+                                if (isValidDrop(carryingItems, originalInput)) {
                                     itemIndex = input.indexOf(" ") + 1;
                                     for (int l = 0; l < carryingItems.size(); l++) {
                                         if (carryingItems.get(l).equalsIgnoreCase(input.substring(itemIndex))) {
@@ -103,11 +108,10 @@ public class Adventure {
                                             break;
                                         }
                                     }
-                                    room.addItem(input.substring(itemIndex));
                                 }
                             }
                             if (input.contains("go ")) {
-                                if (validDirection(input, room)) {
+                                if (validDirection(originalInput, room)) {
                                     itemIndex = input.indexOf(" ") + 1;
                                     String directionInput = input.substring(itemIndex);
                                     for (int i = 0; i < room.getDirections().length; i++) {
@@ -123,7 +127,7 @@ public class Adventure {
 
                             if (!input.contains("go ") && !input.contains("take ") && !input.contains("drop ")
                                     && !input.equals("list")) {
-                                System.out.println("I don't understand '" + input + "'");
+                                System.out.println("I don't understand '" + originalInput + "'");
                             }
                         }
                     }
@@ -131,7 +135,7 @@ public class Adventure {
                         isFinished = true;
                         System.out.println("You reached the end room!");
                     }
-                    System.out.println();
+                    System.out.println(); //To separate the paragraphs of text
                 }
             }
         } catch (UnirestException e) {
@@ -142,26 +146,42 @@ public class Adventure {
         }
     }
 
-
+    /**
+     * This method prints out all the items available in the room
+     * @param room is the room you are getting the items from
+     */
     public static void getItemsInRoom(Room room) {
+        boolean allValuesNull = true;
         if (room.getItems().length == 0) {
             System.out.println("This room contains nothing");
         } else {
             System.out.print("This room contains ");
             for (int i = 0; i < room.getItems().length; i++) {
                 if (room.getItems()[i] != null) {
+                    allValuesNull = false;
                     if (i == room.getItems().length - 1) {
                         System.out.println(room.getItems()[i]);
                     } else {
-                        System.out.print(room.getItems()[i] + ", ");
+                        System.out.print(room.getItems()[i]);
+                        if (i + 1 < room.getItems().length && room.getItems()[i+1] != null) {
+                            System.out.print(", ");
+                        } else {
+                            System.out.println();
+                        }
                     }
-                } else {
-                    System.out.println("nothing");
                 }
+
+            }
+            if (allValuesNull) {
+                System.out.println("nothing");
             }
         }
     }
 
+    /** +
+     * This method prints out all the directions available from the room
+     * @param room is the room you are getting available directions from
+     */
     public static void getAvailableDirections(Room room) {
         System.out.print("From here, you can go: ");
         for (int j = 0; j < room.getDirections().length; j++) {
@@ -184,6 +204,9 @@ public class Adventure {
         if (userInput == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_DIRECTION);
         }
+        if (room == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_ROOM);
+        }
         String inputLowerCase = userInput.toLowerCase();
         /*
         https://stackoverflow.com/questions/2932392/
@@ -203,7 +226,7 @@ public class Adventure {
                 return true;
             }
         }
-        System.out.println("I can't go " + userInput);
+        System.out.println("I can't " + userInput);
         return false;
     }
 
@@ -215,6 +238,9 @@ public class Adventure {
     public static boolean validItemPickup(String userInput, Room room) {
         if (userInput == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_ITEM);
+        }
+        if (room == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_ROOM);
         }
         String inputLowerCase = userInput.toLowerCase();
         //See comment in validDirection
@@ -231,17 +257,16 @@ public class Adventure {
                 return true;
             }
         }
-        System.out.println("I can't take " + userInput);
+        System.out.println("I can't " + userInput);
         return false;
     }
-//        if (inputLowerCase.equals("take coin") || inputLowerCase.equals("take sweatshirt") ||
-//                inputLowerCase.equals("take key") || inputLowerCase.equals("take pizza") ||
-//                inputLowerCase.equals("take usb-c connector") ||
-//                inputLowerCase.equals("take grading rubric") || inputLowerCase.equals("take bagel") ||
-//                inputLowerCase.equals("take coffee") || inputLowerCase.equals("take pencil")) {
-//            return true;
-//        }
 
+    /** +
+     * This method makes sure item is a valid drop
+     * @param list ArrayList that item is dropping from
+     * @param userInput This is the String input user will enter for which item to drop
+     * @return true if is valid drop, false if it is not
+     */
     public static boolean isValidDrop(ArrayList<String> list, String userInput) {
         if (userInput == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_DROP);
@@ -262,7 +287,7 @@ public class Adventure {
                 return true;
             }
         }
-        System.out.println("I can't drop " + userInput);
+        System.out.println("I can't " + userInput);
         return false;
     }
 }
