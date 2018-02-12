@@ -18,6 +18,15 @@ public class Adventure {
     private static final int OK_STATUS = 200;
     private static final String QUIT_GAME = "quit";
     private static final String EXIT_GAME = "exit";
+    private static final String TAKE = "take ";
+    private static final String STEAL = "steal ";
+    private static final String LIST = "list";
+    private static final String DROP = "drop ";
+    private static final String GO = "go ";
+    private static final String WALK = "walk ";
+    private static final String RUN = "run ";
+    private static final String CANT = "I can't ";
+    private static final String NOTHING = "nothing";
 
     private static int itemIndex;
     private static boolean isFinished = false;
@@ -50,22 +59,24 @@ public class Adventure {
             if (stringHttpResponse.getStatus() == OK_STATUS) {
                 String json = stringHttpResponse.getBody();
                 AdventureSetup adventureSetup = gson.fromJson(json, AdventureSetup.class);
-                String orginalStartingRoom = adventureSetup.getStartingRoom();
+
                 while (!isFinished) {
+
                     if (!passedFirstRoom) {
-                        System.out.println("Your starting room is: " + adventureSetup.getStartingRoom());
+                        System.out.println(GameConstants.STARTING_ROOM + adventureSetup.getStartingRoom());
                     }
+
                     rooms = adventureSetup.getRooms();
+
                     for (Room room : rooms) {
                         if (room.getName().equals(adventureSetup.getStartingRoom())) {
                             System.out.println(room.getDescription());
                             if (!passedFirstRoom) {
-                                System.out.println("Your journey beings here");
+                                System.out.println(GameConstants.JOURNEY_BEGINS);
                             }
                             getItemsInRoom(room);
                             getAvailableDirections(room);
                             passedFirstRoom = true;
-
 
                             String originalInput = scan.nextLine();
                             String input = originalInput.toLowerCase();
@@ -76,14 +87,16 @@ public class Adventure {
                          */
                             input = input.trim().replaceAll(" +", " ");
 
+                            boolean invalidInput = true;
+
                             if (input.equals(QUIT_GAME) || input.equals(EXIT_GAME)) {
-                                System.out.println("Exiting Game");
+                                System.out.println(GameConstants.EXITING_GAME);
                                 return;
                             }
-                            if (input.equals("list")) {
-                                System.out.print("You are carrying ");
-                                if (carryingItems.size() == 0 || carryingItems == null) {
-                                    System.out.println("nothing");
+                            if (input.equals(LIST)) {
+                                System.out.print(GameConstants.CARRYING);
+                                if (carryingItems == null || carryingItems.size() == 0) {
+                                    System.out.println(NOTHING);
                                 }
                                 for (int k = 0; k < carryingItems.size(); k++) {
                                     if (k == carryingItems.size() - 1) {
@@ -92,16 +105,18 @@ public class Adventure {
                                         System.out.print(carryingItems.get(k) + ", ");
                                     }
                                 }
+                                invalidInput = false;
                             }
-                            //Allowing steal input :)
-                            if (input.contains("take ") || input.contains("steal ")) {
+                            //Allowing steal input
+                            if (input.contains(TAKE) || input.contains(STEAL)) {
                                 if (validItemPickup(originalInput, room)) {
                                     itemIndex = input.indexOf(" ") + 1;
                                     carryingItems.add(input.substring(itemIndex));
                                     room.removeItem(input.substring(itemIndex));
                                 }
+                                invalidInput = false;
                             }
-                            if (input.contains("drop ")) {
+                            if (input.contains(DROP)) {
                                 if (isValidDrop(carryingItems, originalInput)) {
                                     itemIndex = input.indexOf(" ") + 1;
                                     for (int l = 0; l < carryingItems.size(); l++) {
@@ -112,9 +127,10 @@ public class Adventure {
                                         }
                                     }
                                 }
+                                invalidInput = false;
                             }
                             //Allowing walk and run inputs for optional features
-                            if (input.contains("go ") || input.contains("walk ") || input.contains("run ")) {
+                            if (input.contains(GO) || input.contains(WALK) || input.contains(RUN)) {
                                 if (validDirection(originalInput, room)) {
                                     itemIndex = input.indexOf(" ") + 1;
                                     String directionInput = input.substring(itemIndex);
@@ -128,25 +144,25 @@ public class Adventure {
                                 }
                                 break;
                             }
-
-                            if (!input.contains("go ") && !input.contains("take ") && !input.contains("drop ")
-                                    && !input.equals("list")) {
-                                System.out.println("I don't understand '" + originalInput + "'");
+                            if (invalidInput) {
+                                System.out.println(GameConstants.CANT_UNDERSTAND + originalInput);
                             }
                         }
                     }
                     if (adventureSetup.getEndingRoom().equals(adventureSetup.getStartingRoom())) {
                         isFinished = true;
-                        System.out.println("You have reached your final destination!");
+                        System.out.println(GameConstants.FINAL_DESTINATION);
                     }
                     System.out.println(); //To separate the paragraphs of text
                 }
             }
         } catch (UnirestException e) {
             e.printStackTrace();
-            System.out.println("Network not responding");
+            System.out.println(ErrorConstants.NO_NETWORK_RESPONSE);
         } catch (MalformedURLException e) {
-            System.out.println("Bad URL: " + url);
+            System.out.println(ErrorConstants.BAD_URL + url);
+        } catch (IllegalArgumentException e) {
+            System.out.println(ErrorConstants.INVALID_INPUT);
         }
     }
 
@@ -157,26 +173,15 @@ public class Adventure {
     private static void getItemsInRoom(Room room) {
         boolean allValuesNull = true;
         if (room.getItems() == null || room.getItems().length == 0) {
-            System.out.println("This room contains nothing");
+            System.out.println(GameConstants.NOTHING_IN_ROOM);
         } else {
-            System.out.print("This room contains ");
+            System.out.print(GameConstants.ROOM_CONTAINS);
             for (int i = 0; i < room.getItems().length; i++) {
-                if (room.getItems()[i] != null) {
-                    allValuesNull = false;
-                    if (i == room.getItems().length - 1) {
-                        System.out.println(room.getItems()[i]);
-                    } else {
-                        System.out.print(room.getItems()[i]);
-                        if (i + 1 < room.getItems().length && room.getItems()[i+1] != null) {
-                            System.out.print(", ");
-                        } else {
-                            System.out.println();
-                        }
-                    }
+                if (i == room.getItems().length - 1) {
+                    System.out.println(room.getItems()[i]);
+                } else {
+                    System.out.print(room.getItems()[i] + ", ");
                 }
-            }
-            if (allValuesNull) {
-                System.out.println("nothing");
             }
         }
     }
@@ -186,7 +191,7 @@ public class Adventure {
      * @param room is the room you are getting available directions from
      */
     private static void getAvailableDirections(Room room) {
-        System.out.print("From here, you can go: ");
+        System.out.print(GameConstants.CAN_GO_TO);
         for (int j = 0; j < room.getDirections().length; j++) {
             if (j == room.getDirections().length - 1) {
                 System.out.println(room.getDirections()[j].getDirectionName());
@@ -221,8 +226,8 @@ public class Adventure {
         String directionInput = inputLowerCase.substring(itemIndex);
 
         //For optional features, allowing run and walk inputs
-        if (!inputLowerCase.contains("go ") && !inputLowerCase.contains("run ") &&
-                !inputLowerCase.contains("walk ")) {
+        if (!inputLowerCase.contains(GO) && !inputLowerCase.contains(RUN) &&
+                !inputLowerCase.contains(WALK)) {
             return false;
         }
         for (int i = 0; i < room.getDirections().length; i++) {
@@ -231,7 +236,7 @@ public class Adventure {
                 return true;
             }
         }
-        System.out.println("I can't " + userInput);
+        System.out.println(CANT + userInput);
         return false;
     }
 
@@ -253,7 +258,7 @@ public class Adventure {
         itemIndex = inputLowerCase.indexOf(" ") + 1;
         String itemInput = inputLowerCase.substring(itemIndex);
 
-        if (!inputLowerCase.contains("take ") && !inputLowerCase.contains("steal ")) {
+        if (!inputLowerCase.contains(TAKE) && !inputLowerCase.contains(STEAL)) {
             return false;
         }
         for (int i = 0; i < room.getItems().length; i++) {
@@ -262,7 +267,7 @@ public class Adventure {
                 return true;
             }
         }
-        System.out.println("I can't " + userInput);
+        System.out.println(CANT + userInput);
         return false;
     }
 
@@ -282,7 +287,7 @@ public class Adventure {
         }
         userInput = userInput.toLowerCase().trim().replaceAll(" +", " ");
 
-        if(!userInput.contains("drop ")) {
+        if(!userInput.contains(DROP)) {
             return false;
         }
         int itemIndex = userInput.indexOf(" ") + 1;
@@ -292,7 +297,80 @@ public class Adventure {
                 return true;
             }
         }
-        System.out.println("I can't " + userInput);
+        System.out.println(CANT + userInput);
         return false;
     }
+
+    /**
+     * This method takes the user input and returns statement depending on the input
+     * @param input User input that is go, take, drop etc.
+     * @param room The room that the user is inputting for
+     * Tried separating this but turned out it wouldn't work because AdventureSetup isn't declared
+     */
+//    private static void userInput(String input, Room room) {
+//        String originalInput = input;
+//        input = input.toLowerCase();
+//        goIsInputed = false;
+//        boolean invalidInput = true;
+//
+//        if (input.equals(QUIT_GAME) || input.equals(EXIT_GAME)) {
+//            System.out.println("Exiting Game");
+//            return;
+//        }
+//        if (input.equals(LIST)) {
+//            System.out.print("You are carrying ");
+//            if (carryingItems == null || carryingItems.size() == 0) {
+//                System.out.println("nothing");
+//            }
+//            for (int k = 0; k < carryingItems.size(); k++) {
+//                if (k == carryingItems.size() - 1) {
+//                    System.out.println(carryingItems.get(k));
+//                } else {
+//                    System.out.print(carryingItems.get(k) + ", ");
+//                }
+//            }
+//            invalidInput = false;
+//        }
+//        //Allowing steal input
+//        if (input.contains(TAKE) || input.contains(STEAL)) {
+//            if (validItemPickup(originalInput, room)) {
+//                itemIndex = input.indexOf(" ") + 1;
+//                carryingItems.add(input.substring(itemIndex));
+//                room.removeItem(input.substring(itemIndex));
+//            }
+//            invalidInput = false;
+//        }
+//        if (input.contains(DROP)) {
+//            if (isValidDrop(carryingItems, originalInput)) {
+//                itemIndex = input.indexOf(" ") + 1;
+//                for (int l = 0; l < carryingItems.size(); l++) {
+//                    if (carryingItems.get(l).equalsIgnoreCase(input.substring(itemIndex))) {
+//                        carryingItems.remove(l);
+//                        room.addItem(input.substring(itemIndex));
+//                        break;
+//                    }
+//                }
+//            }
+//            invalidInput = false;
+//        }
+//        //Allowing walk and run inputs for optional features
+//        if (input.contains(GO) || input.contains(WALK) || input.contains(RUN)) {
+//            if (validDirection(originalInput, room)) {
+//                itemIndex = input.indexOf(" ") + 1;
+//                String directionInput = input.substring(itemIndex);
+//                for (int i = 0; i < room.getDirections().length; i++) {
+//                    String directionName = room.getDirections()[i].getDirectionName();
+//                    if (directionName.equalsIgnoreCase(directionInput)) {
+//                        adventureSetup.setStartingRoom(room.getDirections()[i].getRoom());
+//                        break;
+//                    }
+//                }
+//            }
+//            goIsInputed = true;
+//            invalidInput = false;
+//        }
+//        if (invalidInput) {
+//            System.out.println(GameConstants.CANT_UNDERSTAND + originalInput);
+//        }
+//    }
 }

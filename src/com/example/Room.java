@@ -68,6 +68,6 @@ public class Room {
                 break;
             }
         }
-        itemsList.toArray(items);
+        items = itemsList.toArray(new String[itemsList.size()]);
     }
 }
