@@ -14,6 +14,7 @@ import java.util.Scanner;
 public class Adventure {
     private static URL url;
     private static Layout adventureSetup;
+    private static Gson gson = new Gson();
 
     private static final int OK_STATUS = 200;
     private static final String QUIT_GAME = "quit";
@@ -32,33 +33,15 @@ public class Adventure {
     private static boolean isFinished = false;
     private static boolean passedFirstRoom = false;
     private static ArrayList<String> carryingItems;
-    private static Room[] rooms;
+    private static boolean goInputed;
 
     //Main method that will run the actual game
 
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
-        Gson gson = new Gson();
         carryingItems = new ArrayList<String>();
-        /*
-          https://github.com/zillesc/WashingtonPost
-          https://echo360.org/lesson/G_0bf45e48-dfa7-488a-88db-4699e6468c8d_b0113c19
-          -4871-4da9-bad8-9a5f6b017a2f_2018-02-01T12:30:00.000_2018-02-01T13:57:00.000/classroom#sortDirection=desc
-          Classroom video link
-          Looked at the lecture in class to figure out how to get a Json from a URL
 
-          //https://stackoverflow.com/questions/31504123/unhandled-exception-java-net-malformedurlexception
-         */
-        try {
-            final HttpResponse<String> stringHttpResponse;
-
-            url = new URL(AdventureURL.JSON_LINK);
-
-            stringHttpResponse = Unirest.get(AdventureURL.JSON_LINK).asString();
-            // Check to see if the request was successful; if so, convert the payload JSON into Java objects
-            if (stringHttpResponse.getStatus() == OK_STATUS) {
-                String json = stringHttpResponse.getBody();
-                adventureSetup = gson.fromJson(json, Layout.class);
+        adventureSetup(AdventureURL.JSON_LINK);
 
                 while (!isFinished) {
 
@@ -66,7 +49,7 @@ public class Adventure {
                         System.out.println(GameConstants.STARTING_ROOM + adventureSetup.getStartingRoom());
                     }
 
-                    rooms = adventureSetup.getRooms();
+                    Room[] rooms = adventureSetup.getRooms();
 
                     for (Room room : rooms) {
                         if (room.getName().equals(adventureSetup.getStartingRoom())) {
@@ -79,82 +62,39 @@ public class Adventure {
                             passedFirstRoom = true;
 
                             String originalInput = scan.nextLine();
-                            String input = originalInput.toLowerCase();
-                        /*
-                        https://stackoverflow.com/questions/2932392/
-                        java-how-to-replace-2-or-more-spaces-with-single-space-in-string-and-delete-lead
-                        Used this to learn how to remove excess spaces for my input
-                         */
-                            input = input.trim().replaceAll(" +", " ");
 
-                            boolean invalidInput = true;
-
-                            if (input.equals(QUIT_GAME) || input.equals(EXIT_GAME)) {
-                                System.out.println(GameConstants.EXITING_GAME);
-                                return;
-                            }
-                            if (input.equals(LIST)) {
-                                System.out.print(GameConstants.CARRYING);
-                                if (carryingItems == null || carryingItems.size() == 0) {
-                                    System.out.println(NOTHING);
-                                }
-                                for (int k = 0; k < carryingItems.size(); k++) {
-                                    if (k == carryingItems.size() - 1) {
-                                        System.out.println(carryingItems.get(k));
-                                    } else {
-                                        System.out.print(carryingItems.get(k) + ", ");
-                                    }
-                                }
-                                invalidInput = false;
-                            }
-                            //Allowing steal input
-                            if (input.contains(TAKE) || input.contains(STEAL)) {
-                                if (validItemPickup(originalInput, room)) {
-                                    itemIndex = input.indexOf(" ") + 1;
-                                    carryingItems.add(input.substring(itemIndex));
-                                    room.removeItem(input.substring(itemIndex));
-                                }
-                                invalidInput = false;
-                            }
-                            if (input.contains(DROP)) {
-                                if (isValidDrop(carryingItems, originalInput)) {
-                                    itemIndex = input.indexOf(" ") + 1;
-                                    for (int l = 0; l < carryingItems.size(); l++) {
-                                        if (carryingItems.get(l).equalsIgnoreCase(input.substring(itemIndex))) {
-                                            carryingItems.remove(l);
-                                            room.addItem(input.substring(itemIndex));
-                                            break;
-                                        }
-                                    }
-                                }
-                                invalidInput = false;
-                            }
-                            //Allowing walk and run inputs for optional features
-                            if (input.contains(GO) || input.contains(WALK) || input.contains(RUN)) {
-                                if (validDirection(originalInput, room)) {
-                                    itemIndex = input.indexOf(" ") + 1;
-                                    String directionInput = input.substring(itemIndex);
-                                    for (int i = 0; i < room.getDirections().length; i++) {
-                                        String directionName = room.getDirections()[i].getDirectionName();
-                                        if (directionName.equalsIgnoreCase(directionInput)) {
-                                            adventureSetup.setStartingRoom(room.getDirections()[i].getRoom());
-                                            break;
-                                        }
-                                    }
-                                }
+                            userInput(originalInput, room);
+                            if (goInputed) {
                                 break;
-                            }
-                            if (invalidInput) {
-                                System.out.println(GameConstants.CANT_UNDERSTAND + originalInput);
                             }
                         }
                     }
-                    if (adventureSetup.getEndingRoom().equals(adventureSetup.getStartingRoom())) {
-                        isFinished = true;
-                        System.out.println(GameConstants.FINAL_DESTINATION);
-                    }
+                    isGameOver();
+
                     System.out.println(); //To separate the paragraphs of text
                 }
+            }
+
+    private static void adventureSetup (String jsonLink) {
+        /*
+          https://github.com/zillesc/WashingtonPost
+          https://echo360.org/lesson/G_0bf45e48-dfa7-488a-88db-4699e6468c8d_b0113c19
+          -4871-4da9-bad8-9a5f6b017a2f_2018-02-01T12:30:00.000_2018-02-01T13:57:00.000/classroom#sortDirection=desc
+          Classroom video link
+          Looked at the lecture in class to figure out how to get a Json from a URL
+
+          //https://stackoverflow.com/questions/31504123/unhandled-exception-java-net-malformedurlexception
+         */
+        try {
+            final HttpResponse<String> stringHttpResponse;
+
+            url = new URL(jsonLink);
+
+            stringHttpResponse = Unirest.get(AdventureURL.JSON_LINK).asString();
+            // Check to see if the request was successful; if so, convert the payload JSON into Java objects
+            if (stringHttpResponse.getStatus() == OK_STATUS) {
+                String json = stringHttpResponse.getBody();
+                adventureSetup = gson.fromJson(json, Layout.class);
             }
         } catch (UnirestException e) {
             e.printStackTrace();
@@ -166,6 +106,89 @@ public class Adventure {
         }
     }
 
+    /**
+     * This method takes the user input and returns statement depending on the input
+     * @param input User input that is go, take, drop etc.
+     * @param room The room that the user is inputting for
+     * Tried separating this but turned out it wouldn't work because AdventureSetup isn't declared
+     */
+    private static void userInput(String input, Room room) {
+        if (input == null) {
+            throw new IllegalArgumentException(ErrorConstants.INVALID_INPUT);
+        }
+        if (room == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_ROOM);
+        }
+        String originalInput = input;
+        //
+        //https://stackoverflow.com/questions/2932392/
+        //java-how-to-replace-2-or-more-spaces-with-single-space-in-string-and-delete-lead
+        //Used this to learn how to remove excess spaces for my input
+        //
+        input = input.toLowerCase().replaceAll(" +", " ");
+        goInputed = false;
+        boolean invalidInput = true;
+
+        if (input.equals(QUIT_GAME) || input.equals(EXIT_GAME)) {
+            System.out.println(GameConstants.EXITING_GAME);
+            return;
+        }
+        if (input.equals(LIST)) {
+            System.out.print(GameConstants.CARRYING);
+            if (carryingItems == null || carryingItems.size() == 0) {
+                System.out.println(NOTHING);
+            }
+            for (int k = 0; k < carryingItems.size(); k++) {
+                if (k == carryingItems.size() - 1) {
+                    System.out.println(carryingItems.get(k));
+                } else {
+                    System.out.print(carryingItems.get(k) + ", ");
+                }
+            }
+            invalidInput = false;
+        }
+        //Allowing steal input
+        if (input.contains(TAKE) || input.contains(STEAL)) {
+            if (validItemPickup(originalInput, room)) {
+                itemIndex = input.indexOf(" ") + 1;
+                carryingItems.add(input.substring(itemIndex));
+                room.removeItem(input.substring(itemIndex));
+            }
+            invalidInput = false;
+        }
+        if (input.contains(DROP)) {
+            if (isValidDrop(carryingItems, originalInput)) {
+                itemIndex = input.indexOf(" ") + 1;
+                for (int l = 0; l < carryingItems.size(); l++) {
+                    if (carryingItems.get(l).equalsIgnoreCase(input.substring(itemIndex))) {
+                        carryingItems.remove(l);
+                        room.addItem(input.substring(itemIndex));
+                        break;
+                    }
+                }
+            }
+            invalidInput = false;
+        }
+        //Allowing walk and run inputs for optional features
+        if (input.contains(GO) || input.contains(WALK) || input.contains(RUN)) {
+            if (validDirection(originalInput, room)) {
+                itemIndex = input.indexOf(" ") + 1;
+                String directionInput = input.substring(itemIndex);
+                for (int i = 0; i < room.getDirections().length; i++) {
+                    String directionName = room.getDirections()[i].getDirectionName();
+                    if (directionName.equalsIgnoreCase(directionInput)) {
+                        adventureSetup.setStartingRoom(room.getDirections()[i].getRoom());
+                        break;
+                    }
+                }
+            }
+            goInputed = true;
+            invalidInput = false;
+        }
+        if (invalidInput) {
+            System.out.println(GameConstants.CANT_UNDERSTAND + originalInput);
+        }
+    }
     /**
      * This method prints out all the items available in the room
      * @param room is the room you are getting the items from
@@ -302,75 +325,14 @@ public class Adventure {
     }
 
     /**
-     * This method takes the user input and returns statement depending on the input
-     * @param input User input that is go, take, drop etc.
-     * @param room The room that the user is inputting for
-     * Tried separating this but turned out it wouldn't work because AdventureSetup isn't declared
+     * Checks to see if the game is over by checking if the current room matches the end room
      */
-//    private static void userInput(String input, Room room) {
-//        String originalInput = input;
-//        input = input.toLowerCase();
-//        goIsInputed = false;
-//        boolean invalidInput = true;
-//
-//        if (input.equals(QUIT_GAME) || input.equals(EXIT_GAME)) {
-//            System.out.println("Exiting Game");
-//            return;
-//        }
-//        if (input.equals(LIST)) {
-//            System.out.print("You are carrying ");
-//            if (carryingItems == null || carryingItems.size() == 0) {
-//                System.out.println("nothing");
-//            }
-//            for (int k = 0; k < carryingItems.size(); k++) {
-//                if (k == carryingItems.size() - 1) {
-//                    System.out.println(carryingItems.get(k));
-//                } else {
-//                    System.out.print(carryingItems.get(k) + ", ");
-//                }
-//            }
-//            invalidInput = false;
-//        }
-//        //Allowing steal input
-//        if (input.contains(TAKE) || input.contains(STEAL)) {
-//            if (validItemPickup(originalInput, room)) {
-//                itemIndex = input.indexOf(" ") + 1;
-//                carryingItems.add(input.substring(itemIndex));
-//                room.removeItem(input.substring(itemIndex));
-//            }
-//            invalidInput = false;
-//        }
-//        if (input.contains(DROP)) {
-//            if (isValidDrop(carryingItems, originalInput)) {
-//                itemIndex = input.indexOf(" ") + 1;
-//                for (int l = 0; l < carryingItems.size(); l++) {
-//                    if (carryingItems.get(l).equalsIgnoreCase(input.substring(itemIndex))) {
-//                        carryingItems.remove(l);
-//                        room.addItem(input.substring(itemIndex));
-//                        break;
-//                    }
-//                }
-//            }
-//            invalidInput = false;
-//        }
-//        //Allowing walk and run inputs for optional features
-//        if (input.contains(GO) || input.contains(WALK) || input.contains(RUN)) {
-//            if (validDirection(originalInput, room)) {
-//                itemIndex = input.indexOf(" ") + 1;
-//                String directionInput = input.substring(itemIndex);
-//                for (int i = 0; i < room.getDirections().length; i++) {
-//                    String directionName = room.getDirections()[i].getDirectionName();
-//                    if (directionName.equalsIgnoreCase(directionInput)) {
-//                        adventureSetup.setStartingRoom(room.getDirections()[i].getRoom());
-//                        break;
-//                    }
-//                }
-//            }
-//            goIsInputed = true;
-//            invalidInput = false;
-//        }
-//        if (invalidInput) {
-//            System.out.println(GameConstants.CANT_UNDERSTAND + originalInput);
-//        }
-//    }
+    private static void isGameOver() { //boolean for testing purposes only
+        String startingRoom = adventureSetup.getStartingRoom();
+        String endingRoom = adventureSetup.getEndingRoom();
+        if (startingRoom.equals(endingRoom)) {
+            isFinished = true;
+            System.out.println(GameConstants.FINAL_DESTINATION);
+        }
+    }
 }

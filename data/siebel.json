@@ -1,0 +1,242 @@
+{
+  "startingRoom": "MatthewsStreet",
+  "endingRoom": "Siebel1314",
+  "player": [
+    {
+      "name": "Josh",
+      "items": [],
+      "attack": 5,
+      "defense": 5,
+      "health": 100,
+      "level": 1
+    }
+  ],
+  "monsters": [
+    {
+      "name": "Mihir",
+      "attack": 10,
+      "defense": 5,
+      "health": 100
+    },
+    {
+      "name": "Murlock1",
+      "attack": 5,
+      "defense": 1,
+      "health": 10
+    },
+    {
+      "name": "Murlock2",
+      "attack": 5,
+      "defense": 1,
+      "health": 10
+    },
+    {
+      "name": "Murlock3",
+      "attack": 5,
+      "defense": 1,
+      "health": 10
+    },
+    {
+      "name": "Murlock4",
+      "attack": 5,
+      "defense": 1,
+      "health": 10
+    },
+    {
+      "name": "Reaper",
+      "attack": 10,
+      "defense": 5,
+      "health": 30
+    },
+    {
+      "name": "Darkness",
+      "attack": 5,
+      "defense": 15,
+      "health": 100
+    },
+    {
+      "name": "Witch",
+      "attack": 15,
+      "defense": 0,
+      "health": 20
+    },
+    {
+      "name": "Hydra",
+      "attack": 20,
+      "defense": 20,
+      "health": 100
+    },
+    {
+      "name": "Code Reviewer",
+      "attack": 30,
+      "defense": 25,
+      "health": 100
+    }
+    ],
+  "rooms": [
+    {
+      "name": "MatthewsStreet",
+      "description": "You are on Matthews, outside the Siebel Center",
+      "monstersInRoom": ["Murlock1"],
+      "items": [
+        {
+        "name": "coin",
+        "damage": 4
+      }
+      ],
+      "directions": [
+        {
+          "directionName": "East",
+          "room": "SiebelEntry"
+        }
+      ]
+    },
+    {
+      "name": "SiebelEntry",
+      "description": "You are in the west entry of Siebel Center.  You can see the elevator, the ACM office, and hallways to the north and east.",
+      "monstersInRoom": ["Murlock2"],
+      "items": [
+        {
+          "name": "sweatshirt",
+          "damage": 3
+        },
+        {
+          "name": "key",
+          "damage": 5
+        }
+      ],
+      "directions": [
+        {
+          "directionName": "West",
+          "room": "MatthewsStreet"
+        },
+        {
+          "directionName": "Northeast",
+          "room": "AcmOffice"
+        },
+        {
+          "directionName": "North",
+          "room": "SiebelNorthHallway"
+        },
+        {
+          "directionName": "East",
+          "room": "SiebelEastHallway"
+        }
+      ]
+    },
+    {
+      "name": "AcmOffice",
+      "description": "You are in the ACM office.  There are lots of friendly ACM people.",
+      "monstersInRoom": ["Murlock3", "Murlock4"],
+      "items": [
+        {
+          "name": "pizza",
+          "damage": 2
+        },
+        {
+          "name": "swag",
+          "damage": 10
+        }
+      ],
+      "directions": [
+        {
+          "directionName": "South",
+          "room": "SiebelEntry"
+        }
+      ]
+    },
+    {
+      "name": "SiebelNorthHallway",
+      "description": "You are in the north hallway.  You can see Siebel 1112 and the door toward NCSA.",
+      "monstersInRoom": ["Reaper"],
+      "directions": [
+        {
+          "directionName": "South",
+          "room": "SiebelEntry"
+        },
+        {
+          "directionName": "NorthEast",
+          "room": "Siebel1112"
+        }
+      ]
+    },
+    {
+      "name": "Siebel1112",
+      "description": "You are in Siebel 1112.  There is space for two code reviews in this room.",
+      "monstersInRoom": ["Witch"],
+      "items": [
+        {
+          "name": "USB-C connector",
+          "damage": 1
+        },
+        {
+          "name": "grading rubric",
+          "damage": 5
+        }
+      ],
+      "directions": [
+        {
+          "directionName": "West",
+          "room": "SiebelNorthHallway"
+        }
+      ]
+    },
+    {
+      "name": "SiebelEastHallway",
+      "description": "You are in the east hallway.  You can see Einstein Bros' Bagels and a stairway.",
+      "monstersInRoom": ["Darkness"],
+      "items": [
+        {
+          "name": "bagel",
+          "damage": 3
+        },
+        {
+          "name": "coffee",
+          "damage": 10
+        }
+      ],
+      "directions": [
+        {
+          "directionName": "West",
+          "room": "SiebelEntry"
+        },
+        {
+          "directionName": "South",
+          "room": "Siebel1314"
+        },
+        {
+          "directionName": "Down",
+          "room": "SiebelBasement"
+        }
+      ]
+    },
+    {
+      "name": "Siebel1314",
+      "description": "You are in Siebel 1314.  There are happy CS 126 students doing a code review.",
+      "monstersInRoom": ["Mihir", "Code Reviewer"],
+      "directions": [
+        {
+          "directionName": "North",
+          "room": "SiebelEastHallway"
+        }
+      ]
+    },
+    {
+      "name": "SiebelBasement",
+      "description": "You are in the basement of Siebel.  You see tables with students working and door to computer labs.",
+      "monstersInRoom": ["Hydra"],
+      "items": [
+        {
+          "name": "pencil",
+          "damage": 5
+        }
+      ],
+      "directions": [
+        {
+          "directionName": "Up",
+          "room": "SiebelEastHallway"
+        }
+      ]
+    }
+  ]
+}
