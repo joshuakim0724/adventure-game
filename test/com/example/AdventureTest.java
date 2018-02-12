@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 
 public class AdventureTest {
 
-    private AdventureSetup setup;
+    private Layout setup;
     private Room[] room;
 
     @Before
@@ -27,7 +27,7 @@ public class AdventureTest {
 
         stringHttpResponse = Unirest.get(AdventureURL.JSON_LINK).asString();
         String json = stringHttpResponse.getBody();
-        setup = gson.fromJson(json, AdventureSetup.class);
+        setup = gson.fromJson(json, Layout.class);
         room = setup.getRooms();
     }
 

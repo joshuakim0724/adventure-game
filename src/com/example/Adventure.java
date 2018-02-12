@@ -13,7 +13,7 @@ import java.util.Scanner;
 
 public class Adventure {
     private static URL url;
-    private static AdventureSetup adventureSetup;
+    private static Layout adventureSetup;
 
     private static final int OK_STATUS = 200;
     private static final String QUIT_GAME = "quit";
@@ -58,7 +58,7 @@ public class Adventure {
             // Check to see if the request was successful; if so, convert the payload JSON into Java objects
             if (stringHttpResponse.getStatus() == OK_STATUS) {
                 String json = stringHttpResponse.getBody();
-                AdventureSetup adventureSetup = gson.fromJson(json, AdventureSetup.class);
+                adventureSetup = gson.fromJson(json, Layout.class);
 
                 while (!isFinished) {
 

@@ -8,6 +8,7 @@ public class Room {
     private Direction[] directions;
     private String[] items;
     private ArrayList<String> itemsList;
+    private String[] monstersInRoom;
 
     public String getName() {
         return name;
@@ -25,6 +26,9 @@ public class Room {
         return items;
     }
 
+    public String[] getMonstersInRoom() {
+        return monstersInRoom;
+    }
     /**
      * This method will add an item to the Item List
      * @param userInput This is the String input user will enter for which item to add
