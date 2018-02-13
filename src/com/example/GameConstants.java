@@ -11,5 +11,6 @@ public class GameConstants {
     public static final String EXITING_GAME = "Existing Game";
     public static final String CARRYING = "You are carrying ";
     public static final String MONSTERS_EXIST = "There are still monsters here";
+    public static final String NOTHING_OUTPUT = "nothing";
 
 }

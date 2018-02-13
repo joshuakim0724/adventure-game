@@ -1,14 +1,18 @@
 package com.example;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Room {
     private String name;
     private String description;
     private Direction[] directions;
-    private String[] items;
-    private ArrayList<String> itemsList;
+    private Item[] items; //TODO Change items to Item[]
+    private ArrayList<Item> itemsList;
     private String[] monstersInRoom;
+    private Map<String, Item> itemMap = new HashMap();
+    private boolean mapIsSetup = false;
 
     public String getName() {
         return name;
@@ -22,7 +26,7 @@ public class Room {
         return directions;
     }
 
-    public String[] getItems() {
+    public Item[] getItems() {
         return items;
     }
 
@@ -50,49 +54,85 @@ public class Room {
         return true;
     }
 
+    public boolean addRoomItemsToMap() {
+        if (!mapIsSetup) {
+            for (Item item : items) {
+                String itemName = item.getName();
+                addToMap(itemName, item);
+            }
+            mapIsSetup = true;
+        }
+        return true;
+    }
+
+    public void addToMap(String itemName, Item item) {
+        itemMap.put(itemName, item);
+    }
+
+    public Item getItemFromMap(String itemName) {
+        return itemMap.get(itemName);
+    }
+
     /**
      * This method will add an item to the Item List
      * @param userInput This is the String input user will enter for which item to add
      */
-    public void addItem(String userInput) {
-        boolean wasAdded = false;
+    public void addItemToRoom(Item userInput) {
         if (userInput == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_ITEM);
         }
-        //https://stackoverflow.com/questions/157944/create-arraylist-from-array
-        //Converted Array to an ArrayList
-        itemsList = new ArrayList<String>(Arrays.asList(items));
-        for (int j = 0; j < itemsList.size(); j++) {
-            if (itemsList.get(j) == null) {
-                itemsList.set(j, userInput);
-                wasAdded = true;
-                break;
-            }
-        }
-        if (!wasAdded) {
-            itemsList.add(userInput);
-        }
+        String itemName = userInput.getName();
+        itemMap.put(itemName, userInput);
+        itemsList = new ArrayList<Item>(Arrays.asList(items));
 
-        //https://stackoverflow.com/questions/9929321/converting-arraylist-to-array-in-java
-        //Converted ArrayList back to an Array
-        items = itemsList.toArray(new String[itemsList.size()]);
+        itemsList.add(userInput);
+
+        items = itemsList.toArray(new Item[itemsList.size()]);
     }
 
+    public void removeItemFromRoom(String userInput){
+        if (userInput == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_DROP);
+        }
+        itemsList = new ArrayList<Item>(Arrays.asList(items));
+
+        Item newItem = itemMap.get(userInput);
+        itemsList.remove(newItem);
+
+        items = itemsList.toArray(new Item[itemsList.size()]);
+
+    }
+    /* No longer used because Items is now Item[] and not a String
+    //https://stackoverflow.com/questions/157944/create-arraylist-from-array
+    //Converted Array to an ArrayList
+//        itemsList = new ArrayList<String>(Arrays.asList(items));
+//        for (int j = 0; j < itemsList.size(); j++) {
+//            if (itemsList.get(j) == null) {
+//                itemsList.set(j, userInput);
+//                wasAdded = true;
+//                break;
+//        if (!wasAdded) {
+//            itemsList.add(userInput);
+//        }
+//
+//        //https://stackoverflow.com/questions/9929321/converting-arraylist-to-array-in-java
+//        //Converted ArrayList back to an Array
+//        items = itemsList.toArray(new String[itemsList.size()]);
     /**
      * This method will remove an item from the Item List
      * @param userInput This is the String input user will enter for which item to remove
      */
-    public void removeItem(String userInput) {
-        if (userInput == null) {
-            throw new IllegalArgumentException(ErrorConstants.NULL_DROP);
-        }
-        itemsList = new ArrayList<String>(Arrays.asList(items));
-        for (int i = 0; i < itemsList.size(); i++) {
-            if (itemsList.get(i).equalsIgnoreCase(userInput)) {
-                itemsList.remove(i);
-                break;
-            }
-        }
-        items = itemsList.toArray(new String[itemsList.size()]);
-    }
+//    public void removeItem(String userInput) {
+//        if (userInput == null) {
+//            throw new IllegalArgumentException(ErrorConstants.NULL_DROP);
+//        }
+//        itemsList = new ArrayList<String>(Arrays.asList(items));
+//        for (int i = 0; i < itemsList.size(); i++) {
+//            if (itemsList.get(i).equalsIgnoreCase(userInput)) {
+//                itemsList.remove(i);
+//                break;
+//            }
+//        }
+//        items = itemsList.toArray(new String[itemsList.size()]);
+//    }
 }

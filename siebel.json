@@ -1,7 +1,7 @@
 {
   "startingRoom": "MatthewsStreet",
   "endingRoom": "Siebel1314",
-  "player": [
+  "player":
     {
       "name": "Josh",
       "items": [],
@@ -9,8 +9,7 @@
       "defense": 5,
       "health": 100,
       "level": 1
-    }
-  ],
+    },
   "monsters": [
     {
       "name": "Mihir",
