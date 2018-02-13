@@ -29,6 +29,27 @@ public class Room {
     public String[] getMonstersInRoom() {
         return monstersInRoom;
     }
+
+    public boolean printListOfMonsters() {
+        StringBuffer monsterOutput;
+        monsterOutput = new StringBuffer("Monsters ");
+        if (monstersInRoom == null || monstersInRoom.length == 0) {
+            System.out.println("There are no monsters in this room");
+            return false;
+        }
+        for (int i = 0; i < monstersInRoom.length; i++) {
+            if (i == monstersInRoom.length - 1) {
+                monsterOutput.append(monstersInRoom[i]);
+                monsterOutput.append("\n");
+            } else {
+                monsterOutput.append(monstersInRoom[i]);
+                monsterOutput.append(", ");
+            }
+        }
+        System.out.println(monsterOutput);
+        return true;
+    }
+
     /**
      * This method will add an item to the Item List
      * @param userInput This is the String input user will enter for which item to add

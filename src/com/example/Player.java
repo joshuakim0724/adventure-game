@@ -31,4 +31,23 @@ public class Player {
     public int getLevel() {
         return level;
     }
+
+    public void setAttack(double attack) {
+        this.attack = attack;
+    }
+
+    public void setDefense(double defense) {
+        this.defense = defense;
+    }
+
+    public void setHealth(double health) {
+        this.health = health;
+    }
+
+//    public void getPlayerInfo() {
+//        System.out.println("Player Level: " + getLevel());
+//        System.out.println("Player Attack: " + getAttack());
+//        System.out.println("Player Defense: " + getDefense());
+//        System.out.println("Player Health: " + getHealth());
+//    }
 }

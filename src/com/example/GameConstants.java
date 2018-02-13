@@ -10,5 +10,6 @@ public class GameConstants {
     public static final String CAN_GO_TO = "From here you can go: ";
     public static final String EXITING_GAME = "Existing Game";
     public static final String CARRYING = "You are carrying ";
+    public static final String MONSTERS_EXIST = "There are still monsters here";
 
 }

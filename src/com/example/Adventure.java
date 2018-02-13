@@ -17,6 +17,7 @@ public class Adventure {
     private static Gson gson = new Gson();
 
     private static final int OK_STATUS = 200;
+    private static final int healthBars = 20;
     private static final String QUIT_GAME = "quit";
     private static final String EXIT_GAME = "exit";
     private static final String TAKE = "take ";
@@ -29,17 +30,18 @@ public class Adventure {
     private static final String CANT = "I can't ";
     private static final String NOTHING = "nothing";
 
-    private static int itemIndex;
+    private static int inputIndex;
     private static boolean isFinished = false;
     private static boolean passedFirstRoom = false;
-    private static ArrayList<String> carryingItems;
+    private static ArrayList<String> carryingItems = new ArrayList<String>();
     private static boolean goInputed;
+    private static boolean monstersExist;
+    private static boolean inDuel;
 
     //Main method that will run the actual game
 
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
-        carryingItems = new ArrayList<String>();
 
         adventureSetup(AdventureURL.JSON_LINK);
 
@@ -58,6 +60,7 @@ public class Adventure {
                                 System.out.println(GameConstants.JOURNEY_BEGINS);
                             }
                             getItemsInRoom(room);
+                            monstersExist = room.printListOfMonsters();
                             getAvailableDirections(room);
                             passedFirstRoom = true;
 
@@ -75,6 +78,10 @@ public class Adventure {
                 }
             }
 
+    /**
+     * Initializer
+     * @param jsonLink The Json file link that the user wants to read
+     */
     private static void adventureSetup (String jsonLink) {
         /*
           https://github.com/zillesc/WashingtonPost
@@ -90,7 +97,7 @@ public class Adventure {
 
             url = new URL(jsonLink);
 
-            stringHttpResponse = Unirest.get(AdventureURL.JSON_LINK).asString();
+            stringHttpResponse = Unirest.get(jsonLink).asString();
             // Check to see if the request was successful; if so, convert the payload JSON into Java objects
             if (stringHttpResponse.getStatus() == OK_STATUS) {
                 String json = stringHttpResponse.getBody();
@@ -110,7 +117,6 @@ public class Adventure {
      * This method takes the user input and returns statement depending on the input
      * @param input User input that is go, take, drop etc.
      * @param room The room that the user is inputting for
-     * Tried separating this but turned out it wouldn't work because AdventureSetup isn't declared
      */
     private static void userInput(String input, Room room) {
         if (input == null) {
@@ -133,58 +139,74 @@ public class Adventure {
             System.out.println(GameConstants.EXITING_GAME);
             return;
         }
-        if (input.equals(LIST)) {
-            System.out.print(GameConstants.CARRYING);
-            if (carryingItems == null || carryingItems.size() == 0) {
-                System.out.println(NOTHING);
+        if (input.equals("playerinfo")) {
+            adventureSetup.getPlayerInfo();
+        }
+        if (input.startsWith("duel ")) {
+            inputIndex = input.indexOf(" ") + 1;
+            String monsterInput = input.substring(inputIndex);
+            Monster currentMonster = getMonster(monsterInput);
+            if (currentMonster != null) {
+                inDuel = true;
+            } else {
+                System.out.println(CANT + input);
             }
-            for (int k = 0; k < carryingItems.size(); k++) {
-                if (k == carryingItems.size() - 1) {
-                    System.out.println(carryingItems.get(k));
-                } else {
-                    System.out.print(carryingItems.get(k) + ", ");
+        }
+        if (!inDuel) { //If in duel state can't use these commands
+            if (input.equals(LIST)) {
+                System.out.print(GameConstants.CARRYING);
+                if (carryingItems == null || carryingItems.size() == 0) {
+                    System.out.println(NOTHING);
                 }
-            }
-            invalidInput = false;
-        }
-        //Allowing steal input
-        if (input.contains(TAKE) || input.contains(STEAL)) {
-            if (validItemPickup(originalInput, room)) {
-                itemIndex = input.indexOf(" ") + 1;
-                carryingItems.add(input.substring(itemIndex));
-                room.removeItem(input.substring(itemIndex));
-            }
-            invalidInput = false;
-        }
-        if (input.contains(DROP)) {
-            if (isValidDrop(carryingItems, originalInput)) {
-                itemIndex = input.indexOf(" ") + 1;
-                for (int l = 0; l < carryingItems.size(); l++) {
-                    if (carryingItems.get(l).equalsIgnoreCase(input.substring(itemIndex))) {
-                        carryingItems.remove(l);
-                        room.addItem(input.substring(itemIndex));
-                        break;
+                for (int k = 0; k < carryingItems.size(); k++) {
+                    if (k == carryingItems.size() - 1) {
+                        System.out.println(carryingItems.get(k));
+                    } else {
+                        System.out.print(carryingItems.get(k) + ", ");
                     }
                 }
+                invalidInput = false;
             }
-            invalidInput = false;
-        }
-        //Allowing walk and run inputs for optional features
-        if (input.contains(GO) || input.contains(WALK) || input.contains(RUN)) {
-            if (validDirection(originalInput, room)) {
-                itemIndex = input.indexOf(" ") + 1;
-                String directionInput = input.substring(itemIndex);
-                for (int i = 0; i < room.getDirections().length; i++) {
-                    String directionName = room.getDirections()[i].getDirectionName();
-                    if (directionName.equalsIgnoreCase(directionInput)) {
-                        adventureSetup.setStartingRoom(room.getDirections()[i].getRoom());
-                        break;
+            //Allowing steal input
+            if (input.startsWith(TAKE) || input.startsWith(STEAL)) {
+                if (validItemPickup(originalInput, room)) {
+                    inputIndex = input.indexOf(" ") + 1;
+                    carryingItems.add(input.substring(inputIndex));
+                    room.removeItem(input.substring(inputIndex));
+                }
+                invalidInput = false;
+            }
+            if (input.startsWith(DROP)) {
+                if (isValidDrop(carryingItems, originalInput)) {
+                    inputIndex = input.indexOf(" ") + 1;
+                    for (int l = 0; l < carryingItems.size(); l++) {
+                        if (carryingItems.get(l).equalsIgnoreCase(input.substring(inputIndex))) {
+                            carryingItems.remove(l);
+                            room.addItem(input.substring(inputIndex));
+                            break;
+                        }
                     }
                 }
+                invalidInput = false;
             }
-            goInputed = true;
-            invalidInput = false;
+            //Allowing walk and run inputs for optional features
+            if (input.startsWith(GO) || input.startsWith(WALK) || input.startsWith(RUN)) {
+                if (validDirection(originalInput, room)) {
+                    inputIndex = input.indexOf(" ") + 1;
+                    String directionInput = input.substring(inputIndex);
+                    for (int i = 0; i < room.getDirections().length; i++) {
+                        String directionName = room.getDirections()[i].getDirectionName();
+                        if (directionName.equalsIgnoreCase(directionInput)) {
+                            adventureSetup.setStartingRoom(room.getDirections()[i].getRoom());
+                            break;
+                        }
+                    }
+                }
+                goInputed = true;
+                invalidInput = false;
+            }
         }
+
         if (invalidInput) {
             System.out.println(GameConstants.CANT_UNDERSTAND + originalInput);
         }
@@ -245,12 +267,12 @@ public class Adventure {
         Used this to learn how to remove excess spaces for my input
          */
         inputLowerCase = inputLowerCase.trim().replaceAll(" +", " ");
-        itemIndex = inputLowerCase.indexOf(" ") + 1;
-        String directionInput = inputLowerCase.substring(itemIndex);
+        inputIndex = inputLowerCase.indexOf(" ") + 1;
+        String directionInput = inputLowerCase.substring(inputIndex);
 
         //For optional features, allowing run and walk inputs
-        if (!inputLowerCase.contains(GO) && !inputLowerCase.contains(RUN) &&
-                !inputLowerCase.contains(WALK)) {
+        if (!inputLowerCase.startsWith(GO) && !inputLowerCase.startsWith(RUN) &&
+                !inputLowerCase.startsWith(WALK)) {
             return false;
         }
         for (int i = 0; i < room.getDirections().length; i++) {
@@ -275,13 +297,17 @@ public class Adventure {
         if (room == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_ROOM);
         }
+        if (monstersExist) {
+            System.out.println(GameConstants.MONSTERS_EXIST);
+            return false;
+        }
         String inputLowerCase = userInput.toLowerCase();
         //See comment in validDirection
         inputLowerCase = inputLowerCase.trim().replaceAll(" +", " ");
-        itemIndex = inputLowerCase.indexOf(" ") + 1;
-        String itemInput = inputLowerCase.substring(itemIndex);
+        inputIndex = inputLowerCase.indexOf(" ") + 1;
+        String itemInput = inputLowerCase.substring(inputIndex);
 
-        if (!inputLowerCase.contains(TAKE) && !inputLowerCase.contains(STEAL)) {
+        if (!inputLowerCase.startsWith(TAKE) && !inputLowerCase.startsWith(STEAL)) {
             return false;
         }
         for (int i = 0; i < room.getItems().length; i++) {
@@ -310,7 +336,7 @@ public class Adventure {
         }
         userInput = userInput.toLowerCase().trim().replaceAll(" +", " ");
 
-        if(!userInput.contains(DROP)) {
+        if(!userInput.startsWith(DROP)) {
             return false;
         }
         int itemIndex = userInput.indexOf(" ") + 1;
@@ -334,5 +360,116 @@ public class Adventure {
             isFinished = true;
             System.out.println(GameConstants.FINAL_DESTINATION);
         }
+    }
+
+    private static boolean duel(String monster, Room room) {
+        if (monster == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_MONSTER);
+        }
+        if (room == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_ROOM);
+        }
+        for (int i = 0; i < room.getMonstersInRoom().length; i++) {
+            String monsterName = room.getMonstersInRoom()[i];
+            if (monsterName.equalsIgnoreCase((monster))) {
+                inDuel = true;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean attack(Monster monster) {
+        if (!inDuel) {
+            return false;
+        }
+
+        double damageDone = adventureSetup.getPlayer().getAttack() - monster.getDefense();
+        double monsterHealth = monster.getHealth() - damageDone;
+
+        if (monsterHealth <= 0) {
+            inDuel = false;
+            return true;
+        } else {
+            monster.setHealth(monster.getHealth() - damageDone);
+        }
+
+        double monsterDamageDone = monster.getAttack() - adventureSetup.getPlayer().getDefense();
+        double playerHealth = adventureSetup.getPlayer().getHealth() - monsterDamageDone;
+        if (playerHealth > 0) {
+            adventureSetup.getPlayer().setHealth(playerHealth);
+        } else {
+            System.out.println("You have died");
+            System.exit(0);
+        }
+
+        return true;
+    }
+
+    private static boolean attackWithItem(Monster monster, String item) {
+        if (!inDuel) {
+            return false;
+        }
+        double damageDone = adventureSetup.getPlayer().getAttack() + - monster.getDefense();
+        double monsterHealth = monster.getHealth() - damageDone;
+
+        if (monsterHealth <= 0) {
+            inDuel = false;
+            return true;
+        } else {
+            monster.setHealth(monster.getHealth() - damageDone);
+        }
+
+        double monsterDamageDone = monster.getAttack() - adventureSetup.getPlayer().getDefense();
+        double playerHealth = adventureSetup.getPlayer().getHealth() - monsterDamageDone;
+        if (playerHealth > 0) {
+            adventureSetup.getPlayer().setHealth(playerHealth);
+        } else {
+            System.out.println("You have died");
+            System.exit(0);
+        }
+        return true;
+    }
+
+    public static void disegage() {
+        inDuel = false;
+    }
+
+    public static void displayStatus(Monster monster) {
+        double playerHealth = adventureSetup.getPlayer().getHealth();
+        StringBuilder playerHealthOutput = new StringBuilder("Player: ");
+
+        for (int i = 0; i < healthBars; i++) {
+            if (playerHealth - 5 > 0) {
+                playerHealth -= 5;
+                playerHealthOutput.append("#");
+            } else {
+                playerHealthOutput.append("_");
+            }
+        }
+        System.out.println(playerHealthOutput);
+
+        double monsterHealth = monster.getHealth();
+        StringBuilder monsterHealthOutput = new StringBuilder("Monster: ");
+
+        for (int j = 0; j < healthBars; j++) {
+            if (monsterHealth - 5 > 0) {
+                monsterHealth -= 5;
+                monsterHealthOutput.append("#");
+            } else {
+                monsterHealthOutput.append("_");
+            }
+        }
+        System.out.println(monsterHealthOutput);
+    }
+
+    public static Monster getMonster(String monsterInput) {
+        for (int i = 0; i < adventureSetup.getMonsters().length; i++) {
+            String monsterName = adventureSetup.getMonsters()[i].getName();
+            if (monsterInput.equalsIgnoreCase(monsterName)) {
+                return adventureSetup.getMonsters()[i];
+            }
+        }
+        return null;
     }
 }

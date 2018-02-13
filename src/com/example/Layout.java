@@ -1,5 +1,4 @@
 package com.example;
-import java.lang.StringBuffer;
 
 public class Layout {
 
@@ -8,7 +7,6 @@ public class Layout {
     private Room[] rooms;
     private Player player;
     private Monster[] monsters;
-    private boolean monstersExist;
 
     public String getStartingRoom() {
         return startingRoom;
@@ -34,23 +32,10 @@ public class Layout {
         return monsters;
     }
 
-    public void printListOfMonsters() {
-        StringBuffer monsterOutput;
-        monsterOutput = new StringBuffer("Monsters ");
-        if (monsters == null || monsters.length == 0) {
-            System.out.println("There are no monsters in this room");
-            monstersExist = false;
-            return;
-        }
-        for (int i = 0; i < monsters.length; i++) {
-            if (i == monsters.length - 1) {
-                monsterOutput.append(monsters[i]);
-                monsterOutput.append("\n");
-            } else {
-                monsterOutput.append(monsters[i]);
-                monsterOutput.append(", ");
-            }
-        }
-        monstersExist = true;
+    public void getPlayerInfo() {
+        System.out.println("Player Level: " + player.getLevel());
+        System.out.println("Player Attack: " + player.getAttack());
+        System.out.println("Player Defense: " + player.getDefense());
+        System.out.println("Player Health: " + player.getHealth());
     }
 }
