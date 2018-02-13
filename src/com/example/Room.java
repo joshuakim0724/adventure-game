@@ -8,7 +8,7 @@ public class Room {
     private String name;
     private String description;
     private Direction[] directions;
-    private Item[] items; //TODO Change items to Item[]
+    private Item[] items;
     private ArrayList<Item> itemsList;
     private String[] monstersInRoom;
     private Map<String, Item> itemMap = new HashMap();
