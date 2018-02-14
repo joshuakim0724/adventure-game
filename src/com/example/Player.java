@@ -2,6 +2,8 @@ package com.example;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Player {
     private String name;
@@ -12,8 +14,9 @@ public class Player {
     private double health;
     private int level;
 
+    private Map<String, Item> itemMap = new HashMap();
     private double exp = 0;
-    private double maxHealth = health;
+    private double maxHealth;
 
     public String getName() {
         return name;
@@ -47,14 +50,6 @@ public class Player {
         return maxHealth;
     }
 
-    public void setAttack(double attack) {
-        this.attack = attack;
-    }
-
-    public void setDefense(double defense) {
-        this.defense = defense;
-    }
-
     public void setHealth(double health) {
         this.health = health;
     }
@@ -67,24 +62,41 @@ public class Player {
         this.exp = exp;
     }
 
+    private void setAttack(double attack) {
+        this.attack = attack;
+    }
+
+    private void setDefense(double defense) {
+        this.defense = defense;
+    }
+
     public void setMaxHealth(double maxHealth) {
         this.maxHealth = maxHealth;
+    }
+
+    public Item getItemFromMap(String itemName) {
+        return itemMap.get(itemName);
     }
 
     public void addItem(Item item) {
         if (item == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_ITEM);
         }
+        itemMap.put(item.getName(), item);
+
         itemsList = new ArrayList<Item>(Arrays.asList(items));
 
         itemsList.add(item);
 
         items = itemsList.toArray(new Item[itemsList.size()]);
     }
+
     public void removeItem(Item item) {
         if (item == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_ITEM);
         }
+        itemMap.remove(item.getName());
+
         itemsList = new ArrayList<Item>(Arrays.asList(items));
 
         itemsList.remove(item);
@@ -106,10 +118,32 @@ public class Player {
             }
         }
     }
-//    public void getPlayerInfo() {
-//        System.out.println("Player Level: " + getLevel());
-//        System.out.println("Player Attack: " + getAttack());
-//        System.out.println("Player Defense: " + getDefense());
-//        System.out.println("Player Health: " + getHealth());
-//    }
+    public void getPlayerInfo() {
+        System.out.println("Player Level: " + getLevel());
+        System.out.println("Player Attack: " + getAttack());
+        System.out.println("Player Defense: " + getDefense());
+        System.out.println("Player Health: " + getHealth());
+    }
+
+
+    public double experienceNeeded(int playerLevel) {
+        double expNeeded;
+
+        if (playerLevel == 1) {
+            expNeeded = 25;
+            return expNeeded;
+        }
+        if (playerLevel == 2) {
+            expNeeded = 50;
+            return expNeeded;
+        }
+        return expNeeded = (experienceNeeded(playerLevel - 1) +
+                experienceNeeded(playerLevel - 2)) * 1.1;
+    }
+
+    public void levelUp() {
+        setAttack(getAttack() * 1.5);
+        setDefense(getDefense() * 1.5);
+        setMaxHealth(getMaxHealth() * 1.3);
+    }
 }

@@ -7,6 +7,8 @@ public class Monster {
     private double defense;
     private double health;
 
+    private double maxHealth;
+
     public String getName() {
         return name;
     }
@@ -23,6 +25,10 @@ public class Monster {
         return health;
     }
 
+    public double getMaxHealth() {
+        return maxHealth;
+    }
+
     public void setAttack(double attack) {
         this.attack = attack;
     }
@@ -33,5 +39,9 @@ public class Monster {
 
     public void setHealth(double health) {
         this.health = health;
+    }
+
+    public void setMaxHealth(double maxHealth) {
+        this.maxHealth = maxHealth;
     }
 }

@@ -11,6 +11,7 @@ public class Room {
     private Item[] items;
     private ArrayList<Item> itemsList;
     private String[] monstersInRoom;
+    private ArrayList<String> monstersList;
     private Map<String, Item> itemMap = new HashMap();
     private boolean mapIsSetup = false;
 
@@ -36,7 +37,7 @@ public class Room {
 
     public boolean printListOfMonsters() {
         StringBuffer monsterOutput;
-        monsterOutput = new StringBuffer("Monsters ");
+        monsterOutput = new StringBuffer("This room contains monsters: ");
         if (monstersInRoom == null || monstersInRoom.length == 0) {
             System.out.println("There are no monsters in this room");
             return false;
@@ -44,12 +45,12 @@ public class Room {
         for (int i = 0; i < monstersInRoom.length; i++) {
             if (i == monstersInRoom.length - 1) {
                 monsterOutput.append(monstersInRoom[i]);
-                monsterOutput.append("\n");
             } else {
                 monsterOutput.append(monstersInRoom[i]);
                 monsterOutput.append(", ");
             }
         }
+
         System.out.println(monsterOutput);
         return true;
     }
@@ -90,7 +91,7 @@ public class Room {
         items = itemsList.toArray(new Item[itemsList.size()]);
     }
 
-    public void removeItemFromRoom(String userInput){
+    public void removeItemFromRoom(String userInput) {
         if (userInput == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_DROP);
         }
@@ -101,6 +102,17 @@ public class Room {
 
         items = itemsList.toArray(new Item[itemsList.size()]);
 
+    }
+
+    public void removeMonsterFromRoom(String userInput) {
+        if (userInput == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_DROP);
+        }
+        monstersList = new ArrayList<String>(Arrays.asList(monstersInRoom));
+
+        monstersList.remove(userInput);
+
+        monstersInRoom = monstersList.toArray(new String[monstersList.size()]);
     }
     /* No longer used because Items is now Item[] and not a String
     //https://stackoverflow.com/questions/157944/create-arraylist-from-array

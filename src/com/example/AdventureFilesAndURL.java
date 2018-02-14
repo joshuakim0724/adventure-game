@@ -1,6 +1,6 @@
 package com.example;
 
-public class AdventureURL {
+public class AdventureFilesAndURL {
     public static final String JSON_LINK = "https://courses.engr.illinois.edu/cs126/adventure/siebel.json";
     public static final String SIEBEL = "{\n" +
             "  \"startingRoom\": \"MatthewsStreet\",\n" +
@@ -11,7 +11,7 @@ public class AdventureURL {
             "      \"items\": [],\n" +
             "      \"attack\": 5,\n" +
             "      \"defense\": 5,\n" +
-            "      \"health\": 100,\n" +
+            "      \"health\": 25,\n" +
             "      \"level\": 1\n" +
             "    },\n" +
             "  \"monsters\": [\n" +
