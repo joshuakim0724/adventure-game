@@ -17,7 +17,6 @@ public class LayoutTest {
 
         setup = gson.fromJson(AdventureFilesAndURL.SIEBEL, Layout.class);
         rooms = setup.getRooms();
-
     }
 
     @Test
@@ -52,7 +51,13 @@ public class LayoutTest {
         assertEquals("NorthEast", direction2.getDirectionName());
         assertEquals("Siebel1112", direction2.getRoom());
     }
-    //Tests from previous file
+}
+
+
+
+
+
+//Tests from previous file
 
 //    @Test
 //    public void roomTest() {
@@ -118,4 +123,3 @@ public class LayoutTest {
 //        }
 //        assertEquals("Null Drop Input", str);
 //    }
-}

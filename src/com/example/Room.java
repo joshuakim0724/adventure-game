@@ -11,9 +11,11 @@ public class Room {
     private Item[] items;
     private ArrayList<Item> itemsList;
     private String[] monstersInRoom;
-    private ArrayList<String> monstersList;
     private Map<String, Item> itemMap = new HashMap();
     private boolean mapIsSetup = false;
+
+    private static final String ROOM_CONTAINS = "This room contains monsters: ";
+    private static final String NO_MONSTERS = "There are no monsters in this room";
 
     public String getName() {
         return name;
@@ -37,9 +39,9 @@ public class Room {
 
     public boolean printListOfMonsters() {
         StringBuffer monsterOutput;
-        monsterOutput = new StringBuffer("This room contains monsters: ");
+        monsterOutput = new StringBuffer(ROOM_CONTAINS);
         if (monstersInRoom == null || monstersInRoom.length == 0) {
-            System.out.println("There are no monsters in this room");
+            System.out.println(NO_MONSTERS);
             return false;
         }
         for (int i = 0; i < monstersInRoom.length; i++) {
@@ -66,7 +68,7 @@ public class Room {
         return true;
     }
 
-    public void addToMap(String itemName, Item item) {
+    private void addToMap(String itemName, Item item) {
         itemMap.put(itemName, item);
     }
 
@@ -108,7 +110,7 @@ public class Room {
         if (userInput == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_DROP);
         }
-        monstersList = new ArrayList<String>(Arrays.asList(monstersInRoom));
+        ArrayList<String> monstersList = new ArrayList<String>(Arrays.asList(monstersInRoom));
 
         monstersList.remove(userInput);
 

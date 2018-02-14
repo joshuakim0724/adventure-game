@@ -17,6 +17,7 @@ public class RoomTest {
         Layout setup = gson.fromJson(AdventureFilesAndURL.SIEBEL, Layout.class);
         rooms = setup.getRooms();
     }
+
     @Test
     public void getNameTestTest() {
         Room room1 = rooms[0];
@@ -77,6 +78,8 @@ public class RoomTest {
 
         room2.removeItemFromRoom("key");
     }
+
+    @Test
     public void addNullItem() {
         Room room3 = rooms[2];
         String str = "";
@@ -87,6 +90,8 @@ public class RoomTest {
         }
         assertEquals("Null Item Input", str);
     }
+
+    @Test
     public void dropNullItem() {
         Room room3 = rooms[2];
         String str = "";

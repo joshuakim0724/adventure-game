@@ -20,22 +20,33 @@ public class Adventure {
     private static final int OK_STATUS = 200;
     private static final String QUIT_GAME = "quit";
     private static final String EXIT_GAME = "exit";
-    private static final String TAKE = "take ";
-    private static final String STEAL = "steal ";
-    private static final String LIST = "list";
-    private static final String DROP = "drop ";
-    private static final String GO = "go ";
-    private static final String WALK = "walk ";
-    private static final String RUN = "run ";
-    private static final String CANT = "I can't ";
-    private static final int healthPerBar = 5;
+    private static final String TAKE_INPUT = "take ";
+    private static final String STEAL_INPUT = "steal ";
+    private static final String LIST_INPUT = "list";
+    private static final String DROP_INPUT = "drop ";
+    private static final String GO_INPUT = "go ";
+    private static final String WALK_INPUT = "walk ";
+    private static final String RUN_INPUT = "run ";
+    private static final String DUEL_INPUT = "duel ";
+    private static final String ATTACK_INPUT = "attack";
+    private static final String ATTACK_ITEM = "attack with ";
+    private static final String DISENGAGE_INPUT = "disengage";
+    private static final String STATUS_INPUT = "status";
+    private static final String PLAYER = "Player: ";
+    private static final String MONSTER = "Monster: ";
 
+    private static final String PLAYERINFO = "playerinfo";
+
+    private static final String CANT = "I can't ";
+
+    private static final int healthPerBar = 5;
     private static int inputIndex;
+
     private static boolean isFinished = false;
     private static boolean passedFirstRoom = false;
+    private static boolean inDuel = false;
     private static boolean goInputed;
     private static boolean monstersExist;
-    private static boolean inDuel = false;
     private static boolean wonDuel;
 
     //Main method that will run the actual game
@@ -43,7 +54,8 @@ public class Adventure {
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
 //        adventureSetup(AdventureFilesAndURL.JSON_LINK); This is used to call Json from a link
-        adventureSetup = gson.fromJson(AdventureFilesAndURL.SIEBEL, Layout.class); //Calls json from String
+        adventureSetupFromFile(AdventureFilesAndURL.SIEBEL); //Calls json from String
+
         player = adventureSetup.getPlayer();
         player.setMaxHealth(player.getHealth());
         adventureSetup.setMonsterMaxHealth();
@@ -89,7 +101,10 @@ public class Adventure {
             System.out.println(ErrorConstants.INVALID_INPUT);
         }
     }
-
+    public static Layout adventureSetupFromFile (String jsonFile) {
+        adventureSetup = gson.fromJson(jsonFile, Layout.class);
+        return adventureSetup;
+    }
     /**
      * Initializer
      * @param jsonLink The Json file link that the user wants to read
@@ -152,38 +167,38 @@ public class Adventure {
             System.out.println(GameConstants.EXITING_GAME);
             return;
         }
-        if (input.equals("playerinfo")) {
+        if (input.equals(PLAYERINFO)) {
             player.getPlayerInfo();
             invalidInput = false;
         }
-        if (input.startsWith("duel ")) {
+        if (input.startsWith(DUEL_INPUT)) {
             validDuel(originalInput, room);
             invalidInput = false;
         }
         if (!inDuel) { //If in duel state can't use these commands
-            if (input.equals(LIST)) {
+            if (input.equals(LIST_INPUT)) {
                 player.printItems();
                 invalidInput = false;
             }
             //Allowing steal input
-            if (input.startsWith(TAKE) || input.startsWith(STEAL)) {
+            if (input.startsWith(TAKE_INPUT) || input.startsWith(STEAL_INPUT)) {
                 itemPickup(originalInput, room);
                 invalidInput = false;
 
             }
-            if (input.startsWith(DROP)) {
+            if (input.startsWith(DROP_INPUT)) {
                 itemDrop(player.getItems(), originalInput, room);
                 invalidInput = false;
 
             }
             //Allowing walk and run inputs for optional features
-            if (input.startsWith(GO) || input.startsWith(WALK) || input.startsWith(RUN)) {
+            if (input.startsWith(GO_INPUT) || input.startsWith(WALK_INPUT) || input.startsWith(RUN_INPUT)) {
                 validDirection(originalInput, room);
                 invalidInput = false;
             }
         }
         if (inDuel) {
-            if (input.equals("attack")) {
+            if (input.equals(ATTACK_INPUT)) {
                     wonDuel = attack(currentMonster);
                     if (wonDuel) {
                         room.removeMonsterFromRoom(currentMonster.getName());
@@ -193,7 +208,7 @@ public class Adventure {
                 invalidInput = false;
             }
 
-            if (input.startsWith("attack with ")) {
+            if (input.startsWith(ATTACK_ITEM)) {
 
                 wonDuel = attackWithItem(currentMonster, input);
                 if (wonDuel) {
@@ -204,20 +219,20 @@ public class Adventure {
                 invalidInput = false;
 
             }
-            if (input.equals("disengage")) {
+            if (input.equals(DISENGAGE_INPUT)) {
                 disengage();
                 invalidInput = false;
 
             }
-            if (input.equals("status")) {
+            if (input.equals(STATUS_INPUT)) {
                 displayStatus(currentMonster);
                 invalidInput = false;
             }
         }
         if (invalidInput) {
-            if (input.equals("attack") || input.startsWith("attack with ") ||
-                    input.equals("disengage") || input.equals("status")) {
-                System.out.println("Can't use this method, not in duel");
+            if (input.equals(ATTACK_INPUT) || input.startsWith(ATTACK_ITEM) ||
+                    input.equals(DISENGAGE_INPUT) || input.equals(STATUS_INPUT)) {
+                System.out.println(GameConstants.INVALID_METHOD_IN_DUEL);
             } else {
                 System.out.println(GameConstants.CANT_UNDERSTAND + originalInput);
             }
@@ -273,7 +288,7 @@ public class Adventure {
             throw new IllegalArgumentException(ErrorConstants.NULL_ROOM);
         }
         if (monstersExist) {
-            System.out.println("There are still monsters here, I can't move");
+            System.out.println(GameConstants.MONSTERS_EXIST + GameConstants.CANT_MOVE);
             return false;
         }
         String inputLowerCase = userInput.toLowerCase();
@@ -282,8 +297,8 @@ public class Adventure {
         String directionInput = inputLowerCase.substring(inputIndex);
 
         //For optional features, allowing run and walk inputs
-        if (!inputLowerCase.startsWith(GO) && !inputLowerCase.startsWith(RUN) &&
-                !inputLowerCase.startsWith(WALK)) {
+        if (!inputLowerCase.startsWith(GO_INPUT) && !inputLowerCase.startsWith(RUN_INPUT) &&
+                !inputLowerCase.startsWith(WALK_INPUT)) {
             return false;
         }
         for (int i = 0; i < room.getDirections().length; i++) {
@@ -321,7 +336,7 @@ public class Adventure {
         inputIndex = inputLowerCase.indexOf(" ") + 1;
         String userItemName = userInput.substring(inputIndex);
 
-        if (!inputLowerCase.startsWith(TAKE) && !inputLowerCase.startsWith(STEAL)) {
+        if (!inputLowerCase.startsWith(TAKE_INPUT) && !inputLowerCase.startsWith(STEAL_INPUT)) {
             return false;
         }
         for (int i = 0; i < room.getItems().length; i++) {
@@ -358,7 +373,7 @@ public class Adventure {
         inputIndex = inputLowerCase.indexOf(" ") + 1;
         String userItemName = userInput.substring(inputIndex);
 
-        if(!userInput.startsWith(DROP)) {
+        if(!userInput.startsWith(DROP_INPUT)) {
             return false;
         }
 
@@ -378,7 +393,7 @@ public class Adventure {
     /**
      * Checks to see if the game is over by checking if the current room matches the end room
      */
-    public static void isGameOver() { //boolean for testing purposes only
+    private static void isGameOver() { //boolean for testing purposes only
         String startingRoom = adventureSetup.getStartingRoom();
         String endingRoom = adventureSetup.getEndingRoom();
         if (startingRoom.equals(endingRoom)) {
@@ -409,7 +424,7 @@ public class Adventure {
                 String monsterName = room.getMonstersInRoom()[i];
 
                 if (monsterName.equalsIgnoreCase((currentMonster.getName()))) {
-                    System.out.println("You are now in a Duel");
+                    System.out.println(GameConstants.TIME_TO_DUEL);
                     inDuel = true;
                     return true;
                 }
@@ -433,14 +448,14 @@ public class Adventure {
         double roundDamageDone = Math.round(damageDone * 100) / 100; //100 for 2 decimal points
         double monsterHealth = monster.getHealth() - damageDone;
         //Not letting player do negative damage
-        if (damageDone < 0) {
-            damageDone = 0;
+        if (roundDamageDone < 0) {
+            roundDamageDone = 0;
         }
-        System.out.println("You did " + damageDone + " damage");
+        System.out.println(GameConstants.DID + roundDamageDone + GameConstants.DAMAGE);
 
         if (monsterHealth < 0) {
             inDuel = false;
-            System.out.println("You won your duel against " + monster.getName());
+            System.out.println(GameConstants.WON_DUEL + monster.getName());
             giveEXP(monster);
             return true;
         } else {
@@ -453,12 +468,12 @@ public class Adventure {
         if (monsterDamageDone < 0) {
             monsterDamageDone = 0;
         }
-        System.out.println("You received " + monsterDamageDone + " damage");
+        System.out.println(GameConstants.RECEIVED + monsterDamageDone + GameConstants.DAMAGE);
 
         if (playerHealth > 0) {
             adventureSetup.getPlayer().setHealth(playerHealth);
         } else {
-            System.out.println("You have died");
+            System.out.println(GameConstants.YOU_DEAD_BRO);
             System.exit(0);
         }
 
@@ -495,14 +510,14 @@ public class Adventure {
         double roundDamageDone = Math.round(damageDone * 100) / 100; //100 for 2 decimal points
         double monsterHealth = monster.getHealth() - damageDone;
         //Not letting player do negative damage
-        if (damageDone < 0) {
-            damageDone = 0;
+        if (roundDamageDone < 0) {
+            roundDamageDone = 0;
         }
-        System.out.println("You did " + roundDamageDone + " damage");
+        System.out.println(GameConstants.DID + roundDamageDone + GameConstants.DAMAGE);
 
         if (monsterHealth < 0) {
             inDuel = false;
-            System.out.println("You won your duel against " + monster.getName());
+            System.out.println(GameConstants.WON_DUEL + monster.getName());
             giveEXP(monster);
             return true;
         } else {
@@ -516,19 +531,19 @@ public class Adventure {
         if (roundMonsterDamage < 0) {
             roundMonsterDamage = 0;
         }
-        System.out.println("You received " + roundMonsterDamage + " damage");
+        System.out.println(GameConstants.RECEIVED + roundMonsterDamage + GameConstants.DAMAGE);
 
         if (playerHealth > 0) {
             adventureSetup.getPlayer().setHealth(playerHealth);
         } else {
-            System.out.println("You have died");
+            System.out.println(GameConstants.YOU_DEAD_BRO);
             System.exit(0);
         }
         return false;
     }
 
     /**
-     * Checks to see if item is valid
+     * Checks to see if item is valid. Helper method
      * @param itemInput Item String that you are testing
      * @return true if is valid, false if not
      */
@@ -546,8 +561,8 @@ public class Adventure {
     /**
      * Retreats from the fight and exits duel state
      */
-    public static void disengage() {
-        System.out.println("Retreating from fight");
+    private static void disengage() {
+        System.out.println(GameConstants.RUNAWAY);
         inDuel = false;
     }
 
@@ -555,10 +570,10 @@ public class Adventure {
      * Display Player health bar and monster health bar
      * @param monster which monsters health bar you are displaying
      */
-    public static void displayStatus(Monster monster) {
+    private static void displayStatus(Monster monster) {
         if (inDuel) {
             double playerHealth = adventureSetup.getPlayer().getHealth();
-            StringBuilder playerHealthOutput = new StringBuilder("Player: ");
+            StringBuilder playerHealthOutput = new StringBuilder(PLAYER);
             //https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#ceil-double-
             int numberOfHealthBars = (int) Math.ceil((player.getMaxHealth() / healthPerBar));
 
@@ -573,7 +588,7 @@ public class Adventure {
             System.out.println(playerHealthOutput);
 
             double monsterHealth = monster.getHealth();
-            StringBuilder monsterHealthOutput = new StringBuilder("Monster: ");
+            StringBuilder monsterHealthOutput = new StringBuilder(MONSTER);
             numberOfHealthBars = (int) Math.ceil((monster.getMaxHealth() / healthPerBar));
 
             for (int j = 0; j < numberOfHealthBars; j++) {
@@ -593,7 +608,7 @@ public class Adventure {
      * @param monsterInput String input that is name of the monster
      * @return monster from a string input
      */
-    public static Monster getMonster(String monsterInput) {
+    private static Monster getMonster(String monsterInput) {
         for (int i = 0; i < adventureSetup.getMonsters().length; i++) {
             String monsterName = adventureSetup.getMonsters()[i].getName();
             if (monsterInput.equalsIgnoreCase(monsterName)) {
@@ -607,21 +622,19 @@ public class Adventure {
      * Gives exp earned to the player
      * @param monster which exp gained is calculated from
      */
-    public static void giveEXP(Monster monster) {
+    private static void giveEXP(Monster monster) {
         int playerLevel = adventureSetup.getPlayer().getLevel();
         double currentPlayerExp = adventureSetup.getPlayer().getExp();
         double totalExpGained = currentPlayerExp +
                 ((monster.getAttack() + monster.getDefense()) / 2 + monster.getMaxHealth()) * 20; //formula for exp
 
-        System.out.println("You gained " + totalExpGained + " exp");
+        System.out.println(GameConstants.GAINED + totalExpGained + GameConstants.EXP);
         while (totalExpGained > player.experienceNeeded(playerLevel)) {
             totalExpGained = totalExpGained - player.experienceNeeded(playerLevel);
 
             if (totalExpGained > 0) {
-                System.out.println("You leveled up!");
-                player.setLevel(playerLevel + 1); //level up
+                System.out.println(GameConstants.LEVEL_UP);
                 player.levelUp();
-                player.setHealth(player.getMaxHealth());
             }
             playerLevel = adventureSetup.getPlayer().getLevel();
             double leftOverExp = totalExpGained;

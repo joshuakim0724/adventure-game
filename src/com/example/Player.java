@@ -55,7 +55,7 @@ public class Player {
         this.health = health;
     }
 
-    public void setLevel(int level) {
+    private void setLevel(int level) {
         this.level = level;
     }
 
@@ -151,5 +151,8 @@ public class Player {
         setAttack(attackRounded);
         setDefense(defenseRounded);
         setMaxHealth(healthRounded);
+
+        setHealth(getMaxHealth()); //Hp restored to full on level up
+        setLevel(getLevel() +1 );
     }
 }

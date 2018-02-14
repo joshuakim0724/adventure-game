@@ -19,8 +19,8 @@ public class PlayerTest {
         setup = gson.fromJson(AdventureFilesAndURL.SIEBEL, Layout.class);
         josh = setup.getPlayer();
         josh.setMaxHealth(josh.getHealth());
-
     }
+
     @Test
     public void testPlayerStats() {
         assertEquals("Josh", josh.getName());
@@ -64,6 +64,5 @@ public class PlayerTest {
         assertEquals(25, josh.experienceNeeded(1), DELTA);
         assertEquals(50, josh.experienceNeeded(2), DELTA);
         assertEquals(82.5, josh.experienceNeeded(3), DELTA);
-
     }
 }
