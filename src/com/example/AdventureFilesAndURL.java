@@ -11,7 +11,7 @@ public class AdventureFilesAndURL {
             "      \"items\": [],\n" +
             "      \"attack\": 5,\n" +
             "      \"defense\": 5,\n" +
-            "      \"health\": 25,\n" +
+            "      \"health\": 20,\n" +
             "      \"level\": 1\n" +
             "    },\n" +
             "  \"monsters\": [\n" +
@@ -23,49 +23,49 @@ public class AdventureFilesAndURL {
             "    },\n" +
             "    {\n" +
             "      \"name\": \"Murlock1\",\n" +
-            "      \"attack\": 5,\n" +
+            "      \"attack\": 8,\n" +
             "      \"defense\": 1,\n" +
             "      \"health\": 10\n" +
             "    },\n" +
             "    {\n" +
             "      \"name\": \"Murlock2\",\n" +
-            "      \"attack\": 5,\n" +
+            "      \"attack\": 8,\n" +
             "      \"defense\": 1,\n" +
             "      \"health\": 10\n" +
             "    },\n" +
             "    {\n" +
             "      \"name\": \"Murlock3\",\n" +
-            "      \"attack\": 5,\n" +
+            "      \"attack\": 8,\n" +
             "      \"defense\": 1,\n" +
             "      \"health\": 10\n" +
             "    },\n" +
             "    {\n" +
             "      \"name\": \"Murlock4\",\n" +
-            "      \"attack\": 5,\n" +
+            "      \"attack\": 8,\n" +
             "      \"defense\": 1,\n" +
             "      \"health\": 10\n" +
             "    },\n" +
             "    {\n" +
             "      \"name\": \"Reaper\",\n" +
-            "      \"attack\": 10,\n" +
+            "      \"attack\": 20,\n" +
             "      \"defense\": 5,\n" +
             "      \"health\": 30\n" +
             "    },\n" +
             "    {\n" +
             "      \"name\": \"Darkness\",\n" +
-            "      \"attack\": 5,\n" +
+            "      \"attack\": 20,\n" +
             "      \"defense\": 15,\n" +
             "      \"health\": 100\n" +
             "    },\n" +
             "    {\n" +
             "      \"name\": \"Witch\",\n" +
-            "      \"attack\": 15,\n" +
+            "      \"attack\": 25,\n" +
             "      \"defense\": 0,\n" +
             "      \"health\": 20\n" +
             "    },\n" +
             "    {\n" +
             "      \"name\": \"Hydra\",\n" +
-            "      \"attack\": 20,\n" +
+            "      \"attack\": 25,\n" +
             "      \"defense\": 20,\n" +
             "      \"health\": 100\n" +
             "    },\n" +
@@ -97,7 +97,7 @@ public class AdventureFilesAndURL {
             "    {\n" +
             "      \"name\": \"SiebelEntry\",\n" +
             "      \"description\": \"You are in the west entry of Siebel Center.  You can see the elevator, the ACM office, and hallways to the north and east.\",\n" +
-            "      \"monstersInRoom\": [\"Murlock2\"],\n" +
+            "      \"monstersInRoom\": [],\n" +
             "      \"items\": [\n" +
             "        {\n" +
             "          \"name\": \"sweatshirt\",\n" +
@@ -130,7 +130,7 @@ public class AdventureFilesAndURL {
             "    {\n" +
             "      \"name\": \"AcmOffice\",\n" +
             "      \"description\": \"You are in the ACM office.  There are lots of friendly ACM people.\",\n" +
-            "      \"monstersInRoom\": [\"Murlock3\", \"Murlock4\"],\n" +
+            "      \"monstersInRoom\": [\"Murlock2\", \"Murlock3\", \"Murlock4\"],\n" +
             "      \"items\": [\n" +
             "        {\n" +
             "          \"name\": \"pizza\",\n" +

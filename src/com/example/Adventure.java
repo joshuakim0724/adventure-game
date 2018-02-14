@@ -93,6 +93,7 @@ public class Adventure {
     /**
      * Initializer
      * @param jsonLink The Json file link that the user wants to read
+     *                 Don't really use this method unless calling from link
      */
     private static void adventureSetup (String jsonLink) {
         /*
@@ -182,7 +183,7 @@ public class Adventure {
             }
         }
         if (inDuel) {
-            if (input.equalsIgnoreCase("attack")) {
+            if (input.equals("attack")) {
                     wonDuel = attack(currentMonster);
                     if (wonDuel) {
                         room.removeMonsterFromRoom(currentMonster.getName());
@@ -214,7 +215,12 @@ public class Adventure {
             }
         }
         if (invalidInput) {
-            System.out.println(GameConstants.CANT_UNDERSTAND + originalInput);
+            if (input.equals("attack") || input.startsWith("attack with ") ||
+                    input.equals("disengage") || input.equals("status")) {
+                System.out.println("Can't use this method, not in duel");
+            } else {
+                System.out.println(GameConstants.CANT_UNDERSTAND + originalInput);
+            }
         }
     }
     /**
@@ -381,6 +387,12 @@ public class Adventure {
         }
     }
 
+    /**
+     * Method will put user in "Duel" state if it is a valid duel
+     * @param userInput Monster input that user wants to duel
+     * @param room What room the "userInput (Monster)" is
+     * @return true if a valid duel, false if not
+     */
     public static boolean validDuel(String userInput, Room room) {
         if (userInput == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_MONSTER);
@@ -407,18 +419,23 @@ public class Adventure {
         return false;
     }
 
+    /**
+     * Attacks the monster
+     * @param monster What monster the user is attacking
+     * @return True if the monster is killed, false otherwise
+     */
     public static boolean attack(Monster monster) {
-        if (!inDuel) {
-            System.out.println("In duel, can't use this command");
-            return false;
-        }
-
         if (monster == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_MONSTER);
         }
 
         double damageDone = adventureSetup.getPlayer().getAttack() - monster.getDefense();
+        double roundDamageDone = Math.round(damageDone * 100) / 100; //100 for 2 decimal points
         double monsterHealth = monster.getHealth() - damageDone;
+        //Not letting player do negative damage
+        if (damageDone < 0) {
+            damageDone = 0;
+        }
         System.out.println("You did " + damageDone + " damage");
 
         if (monsterHealth < 0) {
@@ -432,6 +449,10 @@ public class Adventure {
 
         double monsterDamageDone = monster.getAttack() - adventureSetup.getPlayer().getDefense();
         double playerHealth = adventureSetup.getPlayer().getHealth() - monsterDamageDone;
+        //Not letting monsters do negative damage
+        if (monsterDamageDone < 0) {
+            monsterDamageDone = 0;
+        }
         System.out.println("You received " + monsterDamageDone + " damage");
 
         if (playerHealth > 0) {
@@ -444,6 +465,12 @@ public class Adventure {
         return false;
     }
 
+    /**
+     * Attacks the monster with an item
+     * @param monster What monster user is attacking
+     * @param userInput Item name user is using
+     * @return True if monster is killed, false otherwise/false if userInput is invalid
+     */
     public static boolean attackWithItem(Monster monster, String userInput) {
 
         int itemIndex = userInput.indexOf(" ") + 1;
@@ -465,8 +492,13 @@ public class Adventure {
         }
 
         double damageDone = adventureSetup.getPlayer().getAttack() + item.getDamage() - monster.getDefense();
+        double roundDamageDone = Math.round(damageDone * 100) / 100; //100 for 2 decimal points
         double monsterHealth = monster.getHealth() - damageDone;
-        System.out.println("You did " + damageDone + " damage");
+        //Not letting player do negative damage
+        if (damageDone < 0) {
+            damageDone = 0;
+        }
+        System.out.println("You did " + roundDamageDone + " damage");
 
         if (monsterHealth < 0) {
             inDuel = false;
@@ -478,8 +510,13 @@ public class Adventure {
         }
 
         double monsterDamageDone = monster.getAttack() - adventureSetup.getPlayer().getDefense();
+        double roundMonsterDamage = Math.round(monsterDamageDone * 100) / 100; //100 for 2 decimal points
         double playerHealth = adventureSetup.getPlayer().getHealth() - monsterDamageDone;
-        System.out.println("You received " + monsterDamageDone + " damage");
+        //Not letting monsters do negative damage
+        if (roundMonsterDamage < 0) {
+            roundMonsterDamage = 0;
+        }
+        System.out.println("You received " + roundMonsterDamage + " damage");
 
         if (playerHealth > 0) {
             adventureSetup.getPlayer().setHealth(playerHealth);
@@ -487,9 +524,14 @@ public class Adventure {
             System.out.println("You have died");
             System.exit(0);
         }
-        return true;
+        return false;
     }
 
+    /**
+     * Checks to see if item is valid
+     * @param itemInput Item String that you are testing
+     * @return true if is valid, false if not
+     */
     public static boolean isValidItem(String itemInput) {
         int itemArraySize = adventureSetup.getPlayer().getItems().length;
         for (int i = 0; i < itemArraySize; i++) {
@@ -501,11 +543,18 @@ public class Adventure {
         return false;
     }
 
+    /**
+     * Retreats from the fight and exits duel state
+     */
     public static void disengage() {
         System.out.println("Retreating from fight");
         inDuel = false;
     }
 
+    /**
+     * Display Player health bar and monster health bar
+     * @param monster which monsters health bar you are displaying
+     */
     public static void displayStatus(Monster monster) {
         if (inDuel) {
             double playerHealth = adventureSetup.getPlayer().getHealth();
@@ -539,6 +588,11 @@ public class Adventure {
         }
     }
 
+    /**
+     * Helper Method
+     * @param monsterInput String input that is name of the monster
+     * @return monster from a string input
+     */
     public static Monster getMonster(String monsterInput) {
         for (int i = 0; i < adventureSetup.getMonsters().length; i++) {
             String monsterName = adventureSetup.getMonsters()[i].getName();
@@ -549,6 +603,10 @@ public class Adventure {
         return null;
     }
 
+    /**
+     * Gives exp earned to the player
+     * @param monster which exp gained is calculated from
+     */
     public static void giveEXP(Monster monster) {
         int playerLevel = adventureSetup.getPlayer().getLevel();
         double currentPlayerExp = adventureSetup.getPlayer().getExp();

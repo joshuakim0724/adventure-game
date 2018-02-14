@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+
 public class Player {
     private String name;
     private Item[] items;
@@ -142,8 +143,13 @@ public class Player {
     }
 
     public void levelUp() {
-        setAttack(getAttack() * 1.5);
-        setDefense(getDefense() * 1.5);
-        setMaxHealth(getMaxHealth() * 1.3);
+        //Round to two decimals
+        double attackRounded = Math.round(getAttack() * 1.5 * 100.0) / 100.0;
+        double defenseRounded = Math.round(getDefense() * 1.5 * 100.0) / 100.0;
+        double healthRounded = Math.round(getMaxHealth() * 1.3 * 100.0) / 100.0;
+
+        setAttack(attackRounded);
+        setDefense(defenseRounded);
+        setMaxHealth(healthRounded);
     }
 }
