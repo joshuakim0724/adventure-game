@@ -8,7 +8,6 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Adventure {
@@ -19,7 +18,6 @@ public class Adventure {
     private static Player player;
 
     private static final int OK_STATUS = 200;
-    private static final int healthBars = 20;
     private static final String QUIT_GAME = "quit";
     private static final String EXIT_GAME = "exit";
     private static final String TAKE = "take ";
@@ -30,23 +28,26 @@ public class Adventure {
     private static final String WALK = "walk ";
     private static final String RUN = "run ";
     private static final String CANT = "I can't ";
+    private static final int healthPerBar = 5;
 
     private static int inputIndex;
     private static boolean isFinished = false;
     private static boolean passedFirstRoom = false;
-//    private static ArrayList<String> carryingItems = new ArrayList<String>();
     private static boolean goInputed;
     private static boolean monstersExist;
-    private static boolean inDuel;
+    private static boolean inDuel = false;
     private static boolean wonDuel;
 
     //Main method that will run the actual game
 
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
-//        adventureSetup(AdventureURL.JSON_LINK);
-        adventureSetup = gson.fromJson(AdventureURL.SIEBEL, Layout.class);
+//        adventureSetup(AdventureFilesAndURL.JSON_LINK); This is used to call Json from a link
+        adventureSetup = gson.fromJson(AdventureFilesAndURL.SIEBEL, Layout.class); //Calls json from String
         player = adventureSetup.getPlayer();
+        player.setMaxHealth(player.getHealth());
+        adventureSetup.setMonsterMaxHealth();
+
         try {
             while (!isFinished) {
 
@@ -57,17 +58,21 @@ public class Adventure {
                 Room[] rooms = adventureSetup.getRooms();
 
                 for (Room room : rooms) {
+
                     if (room.getName().equals(adventureSetup.getStartingRoom())) {
-                        System.out.println(room.getDescription());
+                        if(!inDuel) {
+                            System.out.println(room.getDescription());
+                        }
                         if (!passedFirstRoom) {
                             System.out.println(GameConstants.JOURNEY_BEGINS);
                         }
                         room.addRoomItemsToMap();
-                        getItemsInRoom(room);
-                        monstersExist = room.printListOfMonsters();
-                        getAvailableDirections(room);
+                        if (!inDuel) {
+                            getItemsInRoom(room);
+                            monstersExist = room.printListOfMonsters();
+                            getAvailableDirections(room);
+                        }
                         passedFirstRoom = true;
-
                         String originalInput = scan.nextLine();
 
                         userInput(originalInput, room);
@@ -138,7 +143,7 @@ public class Adventure {
         //java-how-to-replace-2-or-more-spaces-with-single-space-in-string-and-delete-lead
         //Used this to learn how to remove excess spaces for my input
         //
-        input = input.toLowerCase().replaceAll(" +", " ");
+        input = input.toLowerCase().trim().replaceAll(" +", " ");
         goInputed = false;
         boolean invalidInput = true;
 
@@ -147,18 +152,11 @@ public class Adventure {
             return;
         }
         if (input.equals("playerinfo")) {
-            adventureSetup.getPlayerInfo();
+            player.getPlayerInfo();
             invalidInput = false;
         }
         if (input.startsWith("duel ")) {
-            inputIndex = input.indexOf(" ") + 1;
-            String monsterInput = input.substring(inputIndex);
-            currentMonster = getMonster(monsterInput);
-            if (currentMonster != null) {
-                inDuel = true;
-            } else {
-                System.out.println(CANT + input);
-            }
+            validDuel(originalInput, room);
             invalidInput = false;
         }
         if (!inDuel) { //If in duel state can't use these commands
@@ -168,41 +166,51 @@ public class Adventure {
             }
             //Allowing steal input
             if (input.startsWith(TAKE) || input.startsWith(STEAL)) {
-                if (itemPickup(originalInput, room)) {
-                    invalidInput = false;
-                }
+                itemPickup(originalInput, room);
+                invalidInput = false;
+
             }
             if (input.startsWith(DROP)) {
-                if (itemDrop(player.getItems(), originalInput, room)) {
-                    invalidInput = false;
-                }
+                itemDrop(player.getItems(), originalInput, room);
+                invalidInput = false;
+
             }
             //Allowing walk and run inputs for optional features
             if (input.startsWith(GO) || input.startsWith(WALK) || input.startsWith(RUN)) {
-                if(validDirection(originalInput, room)) {
-                    invalidInput = false;
-                }
+                validDirection(originalInput, room);
+                invalidInput = false;
             }
         }
         if (inDuel) {
-            if (input.startsWith("attack ") && !input.contains(" with ")) {
-                attack(currentMonster);
+            if (input.equalsIgnoreCase("attack")) {
+                    wonDuel = attack(currentMonster);
+                    if (wonDuel) {
+                        room.removeMonsterFromRoom(currentMonster.getName());
+                        currentMonster = null;
+                    }
                 displayStatus(currentMonster);
+                invalidInput = false;
             }
+
             if (input.startsWith("attack with ")) {
-                int itemIndex = input.indexOf(" ") + 1;
-                String itemName = input.substring(itemIndex);
-                //Since there are two spaces, need to repeat twice to get the item name
-                itemIndex = input.indexOf(" ") + 1;
-                itemName = input.substring(itemIndex);
-                attackWithItem(currentMonster, itemName);
+
+                wonDuel = attackWithItem(currentMonster, input);
+                if (wonDuel) {
+                    room.removeMonsterFromRoom(currentMonster.getName());
+                    currentMonster = null;
+                }
                 displayStatus(currentMonster);
+                invalidInput = false;
+
             }
             if (input.equals("disengage")) {
                 disengage();
+                invalidInput = false;
+
             }
             if (input.equals("status")) {
                 displayStatus(currentMonster);
+                invalidInput = false;
             }
         }
         if (invalidInput) {
@@ -214,16 +222,16 @@ public class Adventure {
      * @param room is the room you are getting the items from
      */
     private static void getItemsInRoom(Room room) {
-        boolean allValuesNull = true;
         if (room.getItems() == null || room.getItems().length == 0) {
             System.out.println(GameConstants.NOTHING_IN_ROOM);
         } else {
             System.out.print(GameConstants.ROOM_CONTAINS);
             for (int i = 0; i < room.getItems().length; i++) {
+                String itemName = room.getItems()[i].getName();
                 if (i == room.getItems().length - 1) {
-                    System.out.println(room.getItems()[i]);
+                    System.out.println(itemName);
                 } else {
-                    System.out.print(room.getItems()[i] + ", ");
+                    System.out.print(itemName + ", ");
                 }
             }
         }
@@ -258,12 +266,11 @@ public class Adventure {
         if (room == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_ROOM);
         }
+        if (monstersExist) {
+            System.out.println("There are still monsters here, I can't move");
+            return false;
+        }
         String inputLowerCase = userInput.toLowerCase();
-        /*
-        https://stackoverflow.com/questions/2932392/
-        java-how-to-replace-2-or-more-spaces-with-single-space-in-string-and-delete-lead
-        Used this to learn how to remove excess spaces for my input
-         */
         inputLowerCase = inputLowerCase.trim().replaceAll(" +", " ");
         inputIndex = inputLowerCase.indexOf(" ") + 1;
         String directionInput = inputLowerCase.substring(inputIndex);
@@ -374,38 +381,53 @@ public class Adventure {
         }
     }
 
-    public static boolean duel(String monster, Room room) {
-        if (monster == null) {
+    public static boolean validDuel(String userInput, Room room) {
+        if (userInput == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_MONSTER);
         }
         if (room == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_ROOM);
         }
-        for (int i = 0; i < room.getMonstersInRoom().length; i++) {
-            String monsterName = room.getMonstersInRoom()[i];
-            if (monsterName.equalsIgnoreCase((monster))) {
-                inDuel = true;
-                return true;
+        inputIndex = userInput.indexOf(" ") + 1;
+        String monsterInput = userInput.substring(inputIndex);
+
+        if (getMonster(monsterInput) != null) {
+            currentMonster = getMonster(monsterInput);
+            for (int i = 0; i < room.getMonstersInRoom().length; i++) {
+                String monsterName = room.getMonstersInRoom()[i];
+
+                if (monsterName.equalsIgnoreCase((currentMonster.getName()))) {
+                    System.out.println("You are now in a Duel");
+                    inDuel = true;
+                    return true;
+                }
             }
         }
+        System.out.println(CANT + userInput);
         return false;
     }
 
     public static boolean attack(Monster monster) {
         if (!inDuel) {
+            System.out.println("In duel, can't use this command");
             return false;
+        }
+
+        if (monster == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_MONSTER);
         }
 
         double damageDone = adventureSetup.getPlayer().getAttack() - monster.getDefense();
         double monsterHealth = monster.getHealth() - damageDone;
         System.out.println("You did " + damageDone + " damage");
 
-        if (monsterHealth <= 0) {
+        if (monsterHealth < 0) {
             inDuel = false;
-            wonDuel = true;
+            System.out.println("You won your duel against " + monster.getName());
+            giveEXP(monster);
             return true;
         } else {
-            monster.setHealth(monster.getHealth() - damageDone);
+            monster.setHealth(monsterHealth);
         }
 
         double monsterDamageDone = monster.getAttack() - adventureSetup.getPlayer().getDefense();
@@ -419,20 +441,36 @@ public class Adventure {
             System.exit(0);
         }
 
-        return true;
+        return false;
     }
 
-    public static boolean attackWithItem(Monster monster, String item) {
+    public static boolean attackWithItem(Monster monster, String userInput) {
+
+        int itemIndex = userInput.indexOf(" ") + 1;
+        String itemName = userInput.substring(itemIndex);
+        //Since there are two spaces, need to repeat twice to get the item name
+        itemIndex = itemName.indexOf(" ") + 1;
+        itemName = itemName.substring(itemIndex);
+
+        Item item;
+
         if (!inDuel) {
             return false;
         }
-        double damageDone = adventureSetup.getPlayer().getAttack() + - monster.getDefense();
+        if (isValidItem(itemName)) {
+            item = player.getItemFromMap(itemName);
+        } else {
+            System.out.println(CANT + itemName);
+            return false;
+        }
+
+        double damageDone = adventureSetup.getPlayer().getAttack() + item.getDamage() - monster.getDefense();
         double monsterHealth = monster.getHealth() - damageDone;
         System.out.println("You did " + damageDone + " damage");
 
-        if (monsterHealth <= 0) {
+        if (monsterHealth < 0) {
             inDuel = false;
-            wonDuel = true;
+            System.out.println("You won your duel against " + monster.getName());
             giveEXP(monster);
             return true;
         } else {
@@ -453,7 +491,8 @@ public class Adventure {
     }
 
     public static boolean isValidItem(String itemInput) {
-        for (int i = 0; i < adventureSetup.getPlayer().getItems().length; i++) {
+        int itemArraySize = adventureSetup.getPlayer().getItems().length;
+        for (int i = 0; i < itemArraySize; i++) {
             String itemName = adventureSetup.getPlayer().getItems()[i].getName();
             if (itemInput.equalsIgnoreCase(itemName)) {
                 return true;
@@ -463,35 +502,41 @@ public class Adventure {
     }
 
     public static void disengage() {
+        System.out.println("Retreating from fight");
         inDuel = false;
     }
 
     public static void displayStatus(Monster monster) {
-        double playerHealth = adventureSetup.getPlayer().getHealth();
-        StringBuilder playerHealthOutput = new StringBuilder("Player: ");
+        if (inDuel) {
+            double playerHealth = adventureSetup.getPlayer().getHealth();
+            StringBuilder playerHealthOutput = new StringBuilder("Player: ");
+            //https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html#ceil-double-
+            int numberOfHealthBars = (int) Math.ceil((player.getMaxHealth() / healthPerBar));
 
-        for (int i = 0; i < healthBars; i++) {
-            if (playerHealth - 5 > 0) {
-                playerHealth -= 5;
-                playerHealthOutput.append("#");
-            } else {
-                playerHealthOutput.append("_");
+            for (int i = 0; i < numberOfHealthBars; i++) {
+                if (playerHealth > 0) {
+                    playerHealth -= healthPerBar;
+                    playerHealthOutput.append("#");
+                } else {
+                    playerHealthOutput.append("_");
+                }
             }
-        }
-        System.out.println(playerHealthOutput);
+            System.out.println(playerHealthOutput);
 
-        double monsterHealth = monster.getHealth();
-        StringBuilder monsterHealthOutput = new StringBuilder("Monster: ");
+            double monsterHealth = monster.getHealth();
+            StringBuilder monsterHealthOutput = new StringBuilder("Monster: ");
+            numberOfHealthBars = (int) Math.ceil((monster.getMaxHealth() / healthPerBar));
 
-        for (int j = 0; j < healthBars; j++) {
-            if (monsterHealth - 5 > 0) {
-                monsterHealth -= 5;
-                monsterHealthOutput.append("#");
-            } else {
-                monsterHealthOutput.append("_");
+            for (int j = 0; j < numberOfHealthBars; j++) {
+                if (monsterHealth > 0) {
+                    monsterHealth -= healthPerBar;
+                    monsterHealthOutput.append("#");
+                } else {
+                    monsterHealthOutput.append("_");
+                }
             }
+            System.out.println(monsterHealthOutput);
         }
-        System.out.println(monsterHealthOutput);
     }
 
     public static Monster getMonster(String monsterInput) {
@@ -508,44 +553,22 @@ public class Adventure {
         int playerLevel = adventureSetup.getPlayer().getLevel();
         double currentPlayerExp = adventureSetup.getPlayer().getExp();
         double totalExpGained = currentPlayerExp +
-                (monster.getAttack() + monster.getDefense()) / 2 + monster.getHealth() * 20; //formula for exp
-        double leftOverExp;
-        if (wonDuel) {
-            while (totalExpGained > experienceNeeded(playerLevel)) {
-                totalExpGained = totalExpGained - experienceNeeded(playerLevel);
+                ((monster.getAttack() + monster.getDefense()) / 2 + monster.getMaxHealth()) * 20; //formula for exp
 
-                if (totalExpGained > 0) {
-                    System.out.println("You leveled up!");
-                    player.setLevel(playerLevel + 1); //level up
-                    levelUp();
-                    player.setHealth(player.getMaxHealth());
-                } else {
-                    leftOverExp = totalExpGained;
-                    player.setExp(leftOverExp);
-                }
+        System.out.println("You gained " + totalExpGained + " exp");
+        while (totalExpGained > player.experienceNeeded(playerLevel)) {
+            totalExpGained = totalExpGained - player.experienceNeeded(playerLevel);
+
+            if (totalExpGained > 0) {
+                System.out.println("You leveled up!");
+                player.setLevel(playerLevel + 1); //level up
+                player.levelUp();
+                player.setHealth(player.getMaxHealth());
             }
+            playerLevel = adventureSetup.getPlayer().getLevel();
+            double leftOverExp = totalExpGained;
+            player.setExp(leftOverExp);
         }
         wonDuel = false;
-    }
-
-    private static double experienceNeeded(int playerLevel) {
-        double expNeeded;
-
-        if (playerLevel == 1) {
-            expNeeded = 25;
-            return expNeeded;
-        }
-        if (playerLevel == 2) {
-            expNeeded = 50;
-            return expNeeded;
-        }
-        return expNeeded = (experienceNeeded(playerLevel - 1) +
-                experienceNeeded(playerLevel - 2)) * 1.1;
-    }
-
-    public static void levelUp() {
-        player.setAttack(player.getAttack() * 1.5);
-        player.setDefense(player.getDefense() * 1.5);
-        player.setMaxHealth(player.getMaxHealth() * 1.3);
     }
 }
