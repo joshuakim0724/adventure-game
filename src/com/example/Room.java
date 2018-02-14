@@ -93,6 +93,10 @@ public class Room {
         items = itemsList.toArray(new Item[itemsList.size()]);
     }
 
+    /**
+     * Will remove item from the room
+     * @param userInput item name
+     */
     public void removeItemFromRoom(String userInput) {
         if (userInput == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_DROP);
@@ -106,6 +110,10 @@ public class Room {
 
     }
 
+    /**
+     * Will remove monster from the room
+     * @param userInput monster name
+     */
     public void removeMonsterFromRoom(String userInput) {
         if (userInput == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_DROP);

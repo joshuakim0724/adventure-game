@@ -105,6 +105,9 @@ public class Player {
         items = itemsList.toArray(new Item[itemsList.size()]);
     }
 
+    /**
+     * Prints out list of items player is carrying
+     */
     public void printItems() {
         System.out.print(GameConstants.CARRYING);
         if (items == null || items.length == 0) {
@@ -119,6 +122,10 @@ public class Player {
             }
         }
     }
+
+    /**
+     * Prints out player info
+     */
     public void getPlayerInfo() {
         System.out.println("Player Level: " + getLevel());
         System.out.println("Player Attack: " + getAttack());
@@ -126,7 +133,11 @@ public class Player {
         System.out.println("Player Health: " + getHealth());
     }
 
-
+    /**
+     * Will return amount of EXP needed to level up
+     * @param playerLevel what level the player is
+     * @return How much exp is needed at the player level
+     */
     public double experienceNeeded(int playerLevel) {
         double expNeeded;
 
@@ -142,6 +153,9 @@ public class Player {
                 experienceNeeded(playerLevel - 2)) * 1.1;
     }
 
+    /**
+     * This will level up the player by the amounts given in the file
+     */
     public void levelUp() {
         //Round to two decimals
         double attackRounded = Math.round(getAttack() * 1.5 * 100.0) / 100.0;

@@ -66,7 +66,6 @@ public class AdventureTest {
     public void testItemPickup() {
         Room room2 = rooms[1];
 
-        //Due to the way the methods are coded, I cannot test true inputs without getting an out of bounds error
         assertEquals(false, Adventure.itemPickup("take grading rubric", room2));
         assertEquals(false, Adventure.itemPickup("take sweat", room2));
         assertEquals(false, Adventure.itemPickup("take coin", room2));
@@ -102,7 +101,6 @@ public class AdventureTest {
         String normalInput = "drop thisClass";
         String otherInput = "drop outOfSchool";
 
-        //Due to the way the methods are coded, I cannot test true inputs without getting an out of bounds error
         assertEquals(false, Adventure.itemDrop(itemList, normalInput, room2));
         assertEquals(false, Adventure.itemDrop(itemList, otherInput, room2));
     }
