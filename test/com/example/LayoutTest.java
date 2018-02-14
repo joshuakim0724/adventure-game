@@ -9,12 +9,15 @@ import static org.junit.Assert.*;
 
 public class LayoutTest {
     private Layout setup;
+    private Room[] rooms;
 
     @Before
     public void setUp() throws Exception {
         Gson gson = new Gson();
 
         setup = gson.fromJson(AdventureFilesAndURL.SIEBEL, Layout.class);
+        rooms = setup.getRooms();
+
     }
 
     @Test
@@ -37,6 +40,18 @@ public class LayoutTest {
         assertEquals("Siebel1314", setup.getEndingRoom());
     }
 
+    @Test
+    public void testDirectionName() {
+        Room room4 = rooms[3];
+        Direction direction1 = room4.getDirections()[0];
+        Direction direction2 = room4.getDirections()[1];
+
+        assertEquals("South", direction1.getDirectionName());
+        assertEquals("SiebelEntry", direction1.getRoom());
+
+        assertEquals("NorthEast", direction2.getDirectionName());
+        assertEquals("Siebel1112", direction2.getRoom());
+    }
     //Tests from previous file
 
 //    @Test
@@ -102,20 +117,5 @@ public class LayoutTest {
 //            str = e.getMessage();
 //        }
 //        assertEquals("Null Drop Input", str);
-//    }
-//
-//    //Testing Direction Class below
-//
-//    @Test
-//    public void testDirectionName() {
-//        Room room4 = rooms[3];
-//        Direction direction1 = room4.getDirections()[0];
-//        Direction direction2 = room4.getDirections()[1];
-//
-//        assertEquals("South", direction1.getDirectionName());
-//        assertEquals("SiebelEntry", direction1.getRoom());
-//
-//        assertEquals("NorthEast", direction2.getDirectionName());
-//        assertEquals("Siebel1112", direction2.getRoom());
 //    }
 }

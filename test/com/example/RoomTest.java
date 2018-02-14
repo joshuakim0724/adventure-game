@@ -7,7 +7,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class RoomTest {
-    private Layout setup;
     private Room[] rooms;
     private static final double DELTA = 1e-15;
 
@@ -15,7 +14,7 @@ public class RoomTest {
     public void setUp() throws Exception {
         Gson gson = new Gson();
 
-        setup = gson.fromJson(AdventureFilesAndURL.SIEBEL, Layout.class);
+        Layout setup = gson.fromJson(AdventureFilesAndURL.SIEBEL, Layout.class);
         rooms = setup.getRooms();
     }
     @Test
