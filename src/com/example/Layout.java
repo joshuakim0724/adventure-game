@@ -52,4 +52,13 @@ public class Layout {
         }
         return null;
     }
+
+    public Room getRoomFromDirection(Direction direction) {
+        for (Room room : rooms) {
+            if (room.getName().equals(direction.getRoom())) {
+                return room;
+            }
+        }
+        return null;
+    }
 }

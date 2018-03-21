@@ -10,7 +10,6 @@ public class Room {
 
     private ArrayList<Item> itemsArrayList = new ArrayList<>();
     private ArrayList<String> monstersArrayList = new ArrayList<>();
-    private boolean monstersExist = true;
 
     public String getName() {
         return name;
@@ -65,11 +64,15 @@ public class Room {
         return itemList.toString();
     }
 
+    public boolean monstersExist() {
+        return monstersArrayList.size() != 0;
+    }
+
     public String getMonstersAvailable() {
         StringBuilder monsterList = new StringBuilder();
 
-        if (monstersArrayList.size() == 0) {
-            monstersExist = false;
+        if (!monstersExist()) {
+            return null;
         }
 
         for (int i = 0; i < monstersArrayList.size(); i ++) {
@@ -87,11 +90,12 @@ public class Room {
      * @param directionInput This is the direction user has inputed
      * @return true if it is valid, false if it is not
      */
-    public Direction validDirection(String directionInput) {
+    public Direction getDirection(String directionInput) {
         if (directionInput == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_DIRECTION);
         }
-        if (monstersExist) {
+        if (monstersExist()) {
+            System.out.println(GameConstants.MONSTERS_EXIST + GameConstants.CANT_MOVE);
             return null;
         }
         for (Direction direction : directions) {
@@ -121,14 +125,15 @@ public class Room {
      * @param itemInput This is the String input that the user will enter into the scanner
      * @return true if it is valid, false if it is not. Boolean only for testing purposes
      */
-    public boolean pickupItem(Player player, String itemInput) {
+    public boolean takeItem(Player player, String itemInput) {
         if (itemInput == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_ITEM);
         }
         if (player == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_PLAYER);
         }
-        if (monstersExist) {
+        if (monstersExist()) {
+            System.out.println(GameConstants.MONSTERS_EXIST + GameConstants.CANT_TAKE);
             return false;
         }
         for (int i = 0; i < itemsArrayList.size(); i++) {
