@@ -37,4 +37,19 @@ public class Layout {
             monster.setMaxHealth(monster.getHealth());
         }
     }
+
+    /**
+     * Helper Method
+     * @param monsterInput String input that is name of the monster
+     * @return monster from a string input
+     */
+    public Monster getMonster(String monsterInput) {
+        for (Monster monster : monsters) {
+            String monsterName = monster.getName();
+            if (monsterInput.equalsIgnoreCase(monsterName)) {
+                return monster;
+            }
+        }
+        return null;
+    }
 }

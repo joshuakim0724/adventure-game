@@ -1,21 +1,17 @@
 package com.example;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 public class Player {
     private String name;
     private Item[] items;
-    private ArrayList<Item> itemsList;
     private double attack;
     private double defense;
     private double health;
     private int level;
 
-    private Map<String, Item> itemMap = new HashMap();
+    private ArrayList<Item> itemsList = new ArrayList<>();
     private double exp = 0;
     private double maxHealth;
 
@@ -51,86 +47,56 @@ public class Player {
         return maxHealth;
     }
 
-    public void setHealth(double health) {
-        this.health = health;
+
+    public void setUpArrayList() {
+        Collections.addAll(itemsList, items);
     }
 
-    private void setLevel(int level) {
-        this.level = level;
-    }
-
-    public void setExp(double exp) {
-        this.exp = exp;
-    }
-
-    private void setAttack(double attack) {
-        this.attack = attack;
-    }
-
-    private void setDefense(double defense) {
-        this.defense = defense;
-    }
-
-    public void setMaxHealth(double maxHealth) {
-        this.maxHealth = maxHealth;
-    }
-
-    public Item getItemFromMap(String itemName) {
-        return itemMap.get(itemName);
-    }
-
-    public void addItem(Item item) {
+    public boolean addItem(Item item) {
         if (item == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_ITEM);
         }
-        itemMap.put(item.getName(), item);
-
-        itemsList = new ArrayList<Item>(Arrays.asList(items));
-
         itemsList.add(item);
 
-        items = itemsList.toArray(new Item[itemsList.size()]);
+        return true;
     }
 
-    public void removeItem(Item item) {
+    public boolean removeItem(Item item) {
         if (item == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_ITEM);
         }
-        itemMap.remove(item.getName());
-
-        itemsList = new ArrayList<Item>(Arrays.asList(items));
-
+        if (!itemsList.contains(item)) {
+            return false;
+        }
         itemsList.remove(item);
-
-        items = itemsList.toArray(new Item[itemsList.size()]);
+        return true;
     }
 
-    /**
-     * Prints out list of items player is carrying
-     */
-    public void printItems() {
-        System.out.print(GameConstants.CARRYING);
+    public String getItemsList() {
+        StringBuilder itemOutput = new StringBuilder(GameConstants.CARRYING);
         if (items == null || items.length == 0) {
-            System.out.println(GameConstants.NOTHING_OUTPUT);
+            itemOutput.append(GameConstants.NOTHING_OUTPUT);
+            return itemOutput.toString();
         }
-        for (int k = 0; k < items.length; k++) {
-            String itemName = items[k].getName();
-            if (k == items.length - 1) {
-                System.out.println(itemName);
+
+        for (int i = 0; i < itemsList.size(); i++) {
+            if (i != itemsList.size() - 1) {
+                itemOutput.append(itemsList.get(i));
+                itemOutput.append(", ");
             } else {
-                System.out.print(itemName + ", ");
+                itemOutput.append(itemsList.get(i));
             }
         }
+        return itemOutput.toString();
     }
 
-    /**
-     * Prints out player info
-     */
-    public void getPlayerInfo() {
-        System.out.println("Player Level: " + getLevel());
-        System.out.println("Player Attack: " + getAttack());
-        System.out.println("Player Defense: " + getDefense());
-        System.out.println("Player Health: " + getHealth());
+    public String getPlayerInfo() {
+        String playerInfo = "Player Level: " + level +
+                "Player Attack: " + attack +
+                "Player Defense: " + defense +
+                "Player Health: " + health;
+
+        return playerInfo;
     }
 
     /**
@@ -139,17 +105,13 @@ public class Player {
      * @return How much exp is needed at the player level
      */
     public double experienceNeeded(int playerLevel) {
-        double expNeeded;
-
         if (playerLevel == 1) {
-            expNeeded = 25;
-            return expNeeded;
+            return 25;
         }
         if (playerLevel == 2) {
-            expNeeded = 50;
-            return expNeeded;
+            return 50;
         }
-        return expNeeded = (experienceNeeded(playerLevel - 1) +
+        return (experienceNeeded(playerLevel - 1) +
                 experienceNeeded(playerLevel - 2)) * 1.1;
     }
 
@@ -162,11 +124,133 @@ public class Player {
         double defenseRounded = Math.round(getDefense() * 1.5 * 100.0) / 100.0;
         double healthRounded = Math.round(getMaxHealth() * 1.3 * 100.0) / 100.0;
 
-        setAttack(attackRounded);
-        setDefense(defenseRounded);
-        setMaxHealth(healthRounded);
+        attack = attackRounded;
+        defense = defenseRounded;
+        health = healthRounded; //Hp restored to full on level up
+        maxHealth = healthRounded;
+        level += 1;
+    }
 
-        setHealth(getMaxHealth()); //Hp restored to full on level up
-        setLevel(getLevel() +1 );
+    public boolean attack(Monster monster) {
+        if (monster == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_MONSTER);
+        }
+        // Player Attack
+        double damageDealt = roundNumber(attack - monster.getDefense());
+        double monsterHealth = monster.getHealth() - damageDealt;
+        // Not letting player do negative damage
+        if (damageDealt < 0) {
+            damageDealt = 0;
+        }
+        System.out.println(GameConstants.DID + damageDealt + GameConstants.DAMAGE);
+
+        if (wonDuel(monster, monsterHealth)) {
+            return true;
+        }
+        // Monster attack
+        double monsterDamageDone = roundNumber(monster.getAttack() - defense);
+        double playerHealth = health - monsterDamageDone;
+        // Not letting monsters do negative damage
+        if (monsterDamageDone < 0) {
+            monsterDamageDone = 0;
+        }
+        System.out.println(GameConstants.RECEIVED + monsterDamageDone + GameConstants.DAMAGE);
+
+        if (playerHealth > 0) {
+            health = playerHealth;
+        } else {
+            System.out.println(GameConstants.YOU_DEAD_BRO);
+            System.exit(0);
+        }
+
+        return false;
+    }
+
+    public boolean attackWithItem(Monster monster, String itemName) {
+        if (monster == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_MONSTER);
+        }
+        Item item;
+        if (getItemIndex(itemName) != -1) {
+            item = itemsList.get(getItemIndex(itemName));
+        } else {
+            System.out.println("I don't have " + itemName);
+            return false;
+        }
+
+        // Player Attack
+        double damageDealt = roundNumber(attack + item.getDamage() - monster.getDefense());
+        double monsterHealth = monster.getHealth() - damageDealt;
+        // Not letting player do negative damage
+        if (damageDealt < 0) {
+            damageDealt = 0;
+        }
+        System.out.println(GameConstants.DID + damageDealt + GameConstants.DAMAGE);
+
+        if (wonDuel(monster, monsterHealth)) {
+            return true;
+        }
+        // Monster attack
+        double monsterDamageDone = roundNumber(monster.getAttack() - defense);
+        double playerHealth = health - monsterDamageDone;
+        // Not letting monsters do negative damage
+        if (monsterDamageDone < 0) {
+            monsterDamageDone = 0;
+        }
+        System.out.println(GameConstants.RECEIVED + monsterDamageDone + GameConstants.DAMAGE);
+
+        if (playerHealth > 0) {
+            health = playerHealth;
+        } else {
+            System.out.println(GameConstants.YOU_DEAD_BRO);
+            System.exit(0);
+        }
+
+        return false;
+    }
+
+    public int getItemIndex(String itemInput) {
+        for (int i = 0; i < itemsList.size(); i++) {
+            String itemName = itemsList.get(i).getName();
+            if (itemInput.equalsIgnoreCase(itemName)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private boolean wonDuel(Monster monster, double monsterHealth) {
+        if (monsterHealth < 0) {
+            System.out.println(GameConstants.WON_DUEL + monster.getName());
+            giveEXP(monster);
+            return true;
+        } else {
+            monster.setHealth(monsterHealth);
+        }
+        return false;
+    }
+
+    private static double roundNumber(double number) {
+        return Math.round(number * 100) / 100;
+    }
+
+    /**
+     * Gives exp earned to the player
+     * @param monster which exp gained is calculated from
+     */
+    private void giveEXP(Monster monster) {
+        double totalExpGained = exp +
+                ((monster.getAttack() + monster.getDefense()) / 2 + monster.getMaxHealth()) * 20; //formula for exp
+        System.out.println(GameConstants.GAINED + totalExpGained + GameConstants.EXP);
+
+        while (totalExpGained > experienceNeeded(level)) {
+            totalExpGained = totalExpGained - experienceNeeded(level);
+
+            if (totalExpGained > 0) {
+                System.out.println(GameConstants.LEVEL_UP);
+                levelUp();
+            }
+        }
+        exp = totalExpGained; // Left over exp;
     }
 }

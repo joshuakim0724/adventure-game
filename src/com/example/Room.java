@@ -1,21 +1,16 @@
 package com.example;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Room {
     private String name;
     private String description;
     private Direction[] directions;
     private Item[] items;
-    private ArrayList<Item> itemsList;
     private String[] monstersInRoom;
-    private Map<String, Item> itemMap = new HashMap();
-    private boolean mapIsSetup = false;
 
-    private static final String ROOM_CONTAINS = "This room contains monsters: ";
-    private static final String NO_MONSTERS = "There are no monsters in this room";
+    private ArrayList<Item> itemsArrayList = new ArrayList<>();
+    private ArrayList<String> monstersArrayList = new ArrayList<>();
+    private boolean monstersExist = true;
 
     public String getName() {
         return name;
@@ -37,124 +32,151 @@ public class Room {
         return monstersInRoom;
     }
 
-    public boolean printListOfMonsters() {
-        StringBuffer monsterOutput;
-        monsterOutput = new StringBuffer(ROOM_CONTAINS);
-        if (monstersInRoom == null || monstersInRoom.length == 0) {
-            System.out.println(NO_MONSTERS);
-            return false;
-        }
-        for (int i = 0; i < monstersInRoom.length; i++) {
-            if (i == monstersInRoom.length - 1) {
-                monsterOutput.append(monstersInRoom[i]);
-            } else {
-                monsterOutput.append(monstersInRoom[i]);
-                monsterOutput.append(", ");
+    public void setUpArrayList() {
+        Collections.addAll(itemsArrayList, items);
+        Collections.addAll(monstersArrayList, monstersInRoom);
+    }
+
+    public String getDirectionsAvailable() {
+        StringBuilder directionList = new StringBuilder();
+
+        for (int i = 0; i < directions.length; i ++) {
+            if (i != directions.length - 1) {
+                directionList.append(directions[i]).append(", ");
+            }
+            else {
+                directionList.append(directions[i]);
             }
         }
-
-        System.out.println(monsterOutput);
-        return true;
+        return directionList.toString();
     }
 
-    public boolean addRoomItemsToMap() {
-        if (!mapIsSetup) {
-            for (Item item : items) {
-                String itemName = item.getName();
-                addToMap(itemName, item);
+    public String getItemsAvailable() {
+        StringBuilder itemList = new StringBuilder();
+
+        for (int i = 0; i < itemsArrayList.size(); i ++) {
+            if (i != itemsArrayList.size() - 1) {
+                itemList.append(itemsArrayList.get(i).getName()).append(", ");
             }
-            mapIsSetup = true;
+            else {
+                itemList.append(itemsArrayList.get(i).getName());
+            }
         }
-        return true;
+        return itemList.toString();
     }
 
-    private void addToMap(String itemName, Item item) {
-        itemMap.put(itemName, item);
-    }
+    public String getMonstersAvailable() {
+        StringBuilder monsterList = new StringBuilder();
 
-    public Item getItemFromMap(String itemName) {
-        return itemMap.get(itemName);
+        if (monstersArrayList.size() == 0) {
+            monstersExist = false;
+        }
+
+        for (int i = 0; i < monstersArrayList.size(); i ++) {
+            if (i != monstersArrayList.size() - 1) {
+                monsterList.append(monstersArrayList.get(i)).append(", ");
+            }
+            else {
+                monsterList.append(monstersArrayList.get(i));
+            }
+        }
+        return monsterList.toString();
+    }
+    /**
+     * This method makes sure the direction is a valid direction
+     * @param directionInput This is the direction user has inputed
+     * @return true if it is valid, false if it is not
+     */
+    public Direction validDirection(String directionInput) {
+        if (directionInput == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_DIRECTION);
+        }
+        if (monstersExist) {
+            return null;
+        }
+        for (Direction direction : directions) {
+            String directionName = direction.getDirectionName();
+            if (directionName.equalsIgnoreCase(directionInput)) {
+                return direction;
+            }
+        }
+        return null;
     }
 
     /**
-     * This method will add an item to the Item List
-     * @param userInput This is the String input user will enter for which item to add
+     * Method will put user in "Duel" state if it is a valid duel
+     * @param monsterName Monster name that user wants to duel
+     * @return true if a valid duel, false if not
      */
-    public void addItemToRoom(Item userInput) {
-        if (userInput == null) {
+    public boolean validDuel(String monsterName) {
+        for (String aMonstersInRoom : monstersInRoom) {
+            if (monsterName.equalsIgnoreCase(aMonstersInRoom)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    /** +
+     * This method makes sure the item is a valid pickup
+     * @param itemInput This is the String input that the user will enter into the scanner
+     * @return true if it is valid, false if it is not. Boolean only for testing purposes
+     */
+    public boolean pickupItem(Player player, String itemInput) {
+        if (itemInput == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_ITEM);
         }
-        String itemName = userInput.getName();
-        itemMap.put(itemName, userInput);
-        itemsList = new ArrayList<Item>(Arrays.asList(items));
-
-        itemsList.add(userInput);
-
-        items = itemsList.toArray(new Item[itemsList.size()]);
+        if (player == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_PLAYER);
+        }
+        if (monstersExist) {
+            return false;
+        }
+        for (int i = 0; i < itemsArrayList.size(); i++) {
+            String itemName = itemsArrayList.get(i).getName();
+            Item item = itemsArrayList.get(i);
+            if (itemInput.equalsIgnoreCase(itemName)) {
+                player.addItem(item);
+                itemsArrayList.remove(item);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
-     * Will remove item from the room
-     * @param userInput item name
+     * This method makes sure item is a valid drop
+     * @param player Where the item is dropping from
+     * @param itemInput This is the String input user will enter for which item to drop
+     * @return true if is valid drop, false if it is not
      */
-    public void removeItemFromRoom(String userInput) {
-        if (userInput == null) {
-            throw new IllegalArgumentException(ErrorConstants.NULL_DROP);
+    public boolean dropItem(Player player, String itemInput) {
+        if (player == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_PLAYER);
         }
-        itemsList = new ArrayList<Item>(Arrays.asList(items));
+        if (itemInput == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_ITEM);
+        }
 
-        Item newItem = itemMap.get(userInput);
-        itemsList.remove(newItem);
+        for (Item anItemList : player.getItems()) {
+            String itemName = anItemList.getName();
 
-        items = itemsList.toArray(new Item[itemsList.size()]);
-
+            if (itemInput.equalsIgnoreCase(itemName)) {
+                player.removeItem(anItemList);
+                itemsArrayList.add(anItemList);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
      * Will remove monster from the room
      * @param userInput monster name
      */
-    public void removeMonsterFromRoom(String userInput) {
+    public boolean removeMonsterFromRoom(String userInput) {
         if (userInput == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_DROP);
         }
-        ArrayList<String> monstersList = new ArrayList<String>(Arrays.asList(monstersInRoom));
-
-        monstersList.remove(userInput);
-
-        monstersInRoom = monstersList.toArray(new String[monstersList.size()]);
+        return monstersArrayList.remove(userInput);
     }
-    /* No longer used because Items is now Item[] and not a String
-    //https://stackoverflow.com/questions/157944/create-arraylist-from-array
-    //Converted Array to an ArrayList
-//        itemsList = new ArrayList<String>(Arrays.asList(items));
-//        for (int j = 0; j < itemsList.size(); j++) {
-//            if (itemsList.get(j) == null) {
-//                itemsList.set(j, userInput);
-//                wasAdded = true;
-//                break;
-//        if (!wasAdded) {
-//            itemsList.add(userInput);
-//        }
-//
-//        //https://stackoverflow.com/questions/9929321/converting-arraylist-to-array-in-java
-//        //Converted ArrayList back to an Array
-//        items = itemsList.toArray(new String[itemsList.size()]);
-    /**
-     * This method will remove an item from the Item List
-     * @param userInput This is the String input user will enter for which item to remove
-     */
-//    public void removeItem(String userInput) {
-//        if (userInput == null) {
-//            throw new IllegalArgumentException(ErrorConstants.NULL_DROP);
-//        }
-//        itemsList = new ArrayList<String>(Arrays.asList(items));
-//        for (int i = 0; i < itemsList.size(); i++) {
-//            if (itemsList.get(i).equalsIgnoreCase(userInput)) {
-//                itemsList.remove(i);
-//                break;
-//            }
-//        }
-//        items = itemsList.toArray(new String[itemsList.size()]);
-//    }
 }
