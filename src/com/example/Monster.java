@@ -53,7 +53,7 @@ public class Monster {
      * Display Player health bar and monster health bar
      * @param player which monsters health bar you are displaying
      */
-    private String displayStatus(Player player) {
+    public String displayStatus(Player player) {
         double playerHealth = player.getHealth();
         StringBuilder playerHealthOutput = new StringBuilder(PLAYER);
         int numberOfHealthBars = (int) Math.ceil((player.getMaxHealth() / healthPerBar));

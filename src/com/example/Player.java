@@ -209,6 +209,21 @@ public class Player {
         return false;
     }
 
+    /**
+     * Checks to see if item is valid. Helper method
+     * @param itemInput Item String that you are testing
+     * @return true if is valid, false if not
+     */
+    public boolean isValidItem(String itemInput) {
+        for (Item anItemsList : itemsList) {
+            String itemName = anItemsList.getName();
+            if (itemInput.equalsIgnoreCase(itemName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public int getItemIndex(String itemInput) {
         for (int i = 0; i < itemsList.size(); i++) {
             String itemName = itemsList.get(i).getName();

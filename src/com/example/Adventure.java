@@ -33,29 +33,32 @@ public class Adventure {
     }
 
     public static void userInput(Scanner scanner) {
-        String input = scanner.nextLine();
-        input = input.trim().replaceAll(" +", " ").toLowerCase();
-
+        String originalInput = scanner.nextLine();
+        String input = originalInput.trim().replaceAll(" +", " ").toLowerCase();
         String[] inputArray = input.split("\\s+");
 
+        if (!regularCommands(inputArray) && !duelCommands(inputArray)) {
+            System.out.println(GameConstants.CANT_UNDERSTAND + originalInput);
+        }
         regularCommands(inputArray);
         if (inDuel) {
             duelCommands(inputArray);
         }
     }
 
-    private static void regularCommands(String[] input) {
+    private static boolean regularCommands(String[] input) {
         String firstWord = input[0];
 
         if (input.length == 1) {
-            oneWordRegularCommands(firstWord);
+            return oneWordRegularCommands(firstWord);
         } else if (input.length == 2) {
             String secondWord = input[1];
-            twoWordRegularCommands(firstWord, secondWord);
+            return twoWordRegularCommands(firstWord, secondWord);
         }
+        return false;
     }
 
-    private static void oneWordRegularCommands(String firstWord) {
+    private static boolean oneWordRegularCommands(String firstWord) {
         switch (firstWord) {
             case GameConstants.QUIT_GAME:
                 System.out.println(GameConstants.EXITING_GAME);
@@ -67,47 +70,97 @@ public class Adventure {
 
             case GameConstants.PLAYERINFO:
                 System.out.println(player.getPlayerInfo());
-                break;
+                return true;
 
             case GameConstants.LIST_INPUT:
                 System.out.println(player.getItemsList());
+                return true;
 
             default:
-                System.out.println(GameConstants.CANT_UNDERSTAND + firstWord);
+                return false;
         }
     }
 
-    private static void twoWordRegularCommands(String firstWord, String secondWord) {
+    private static boolean twoWordRegularCommands(String firstWord, String secondWord) {
         switch (firstWord) {
             case GameConstants.DUEL_INPUT:
                 if (room.validDuel(secondWord)) {
                     inDuel = true;
+                    monster = layout.getMonster(secondWord);
                     System.out.println(GameConstants.TIME_TO_DUEL);
                 } else {
                     System.out.print(GameConstants.CANT_DUEL + secondWord);
                 }
+                return true;
+
             case GameConstants.GO_INPUT:
                 if (room.getDirection(secondWord) != null) {
                     room = layout.getRoomFromDirection(room.getDirection(secondWord));
                 } else {
                     System.out.println(GameConstants.CANT_GO + secondWord);
                 }
+                return true;
+
             case GameConstants.TAKE_INPUT:
                 if (room.takeItem(player, secondWord)) {
                     System.out.println(GameConstants.PICKED_UP + secondWord);
                 } else {
                     System.out.println(GameConstants.CANT_TAKE_ITEM + secondWord);
                 }
+                return true;
+
             case GameConstants.DROP_INPUT:
                 if (room.dropItem(player, secondWord)) {
                     System.out.println(GameConstants.DROPPED + secondWord);
                 } else {
                     System.out.println(GameConstants.CANT_DROP + secondWord);
                 }
+                return true;
+
+            default:
+                return false;
         }
     }
 
-    private static void duelCommands(String[] input) {
+    private static boolean duelCommands(String[] input) {
+        String firstWord = input[0];
+        // Attack with Item Command, Max length input can be is 3
+        if (input.length == 3) {
+            String itemName = input[2];
+            if (player.isValidItem(itemName)) {
+                if (player.attackWithItem(monster, itemName)) {
+                    room.removeMonsterFromRoom(monster.getName());
+                    inDuel = false;
+                    monster = null;
+                }
+            } else {
+                System.out.println(GameConstants.CANT_ATTACK_WITH + itemName);
+            }
+            return true;
+        }
 
+        switch (firstWord) {
+            case GameConstants.ATTACK_INPUT:
+                if (player.attack(monster)) {
+                    room.removeMonsterFromRoom(monster.getName());
+                    inDuel = false;
+                    monster = null;
+                } else {
+                    System.out.println(GameConstants.CANT_ATTACK + firstWord);
+                }
+                return true;
+
+            case GameConstants.DISENGAGE_INPUT:
+                inDuel = false;
+                System.out.println(GameConstants.RUNAWAY);
+                return true;
+
+            case GameConstants.STATUS_INPUT:
+                System.out.println(monster.displayStatus(player));
+                return true;
+
+            default:
+                return false;
+        }
     }
 }

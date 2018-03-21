@@ -176,12 +176,12 @@ public class Room {
 
     /**
      * Will remove monster from the room
-     * @param userInput monster name
+     * @param monsterName monster name
      */
-    public boolean removeMonsterFromRoom(String userInput) {
-        if (userInput == null) {
+    public boolean removeMonsterFromRoom(String monsterName) {
+        if (monsterName == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_DROP);
         }
-        return monstersArrayList.remove(userInput);
+        return monstersArrayList.remove(monsterName);
     }
 }

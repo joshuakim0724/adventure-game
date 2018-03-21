@@ -52,6 +52,9 @@ public class GameConstants {
     public static final String CANT_GO = "I can't go ";
     public static final String CANT_TAKE_ITEM = "I can't take ";
     public static final String CANT_DROP = "I can't drop ";
+    public static final String CANT_ATTACK = "I can't attack ";
+    public static final String CANT_ATTACK_WITH = "I can't attack with ";
+
 
 
     public static final String SIEBEL = "{\n" +
