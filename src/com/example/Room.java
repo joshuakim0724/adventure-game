@@ -34,7 +34,6 @@ public class Room {
     public void setUpArrayList() {
         if (items != null) {
             Collections.addAll(itemsArrayList, items);
-            System.out.println(itemsArrayList.size());
         }
         if (monstersInRoom != null) {
             Collections.addAll(monstersArrayList, monstersInRoom);
@@ -42,21 +41,28 @@ public class Room {
     }
 
     public String getDirectionsAvailable() {
-        StringBuilder directionList = new StringBuilder();
+        if (monstersExist()) {
+            return "";
+        }
+        StringBuilder directionList = new StringBuilder(GameConstants.CAN_GO_TO);
 
         for (int i = 0; i < directions.length; i ++) {
             if (i != directions.length - 1) {
-                directionList.append(directions[i]).append(", ");
+                directionList.append(directions[i].getDirectionName()).append(", ");
             }
             else {
-                directionList.append(directions[i]);
+                directionList.append(directions[i].getDirectionName());
             }
         }
         return directionList.toString();
     }
 
     public String getItemsAvailable() {
-        StringBuilder itemList = new StringBuilder();
+        StringBuilder itemList = new StringBuilder(GameConstants.ROOM_CONTAINS);
+
+        if (itemsArrayList.size() == 0) {
+            return GameConstants.NOTHING_IN_ROOM;
+        }
 
         for (int i = 0; i < itemsArrayList.size(); i ++) {
             if (i != itemsArrayList.size() - 1) {
@@ -74,10 +80,10 @@ public class Room {
     }
 
     public String getMonstersAvailable() {
-        StringBuilder monsterList = new StringBuilder();
+        StringBuilder monsterList = new StringBuilder(GameConstants.ROOM_CONTAINS_MONSTERS);
 
         if (!monstersExist()) {
-            return null;
+            return GameConstants.NO_MONSTERS;
         }
 
         for (int i = 0; i < monstersArrayList.size(); i ++) {
@@ -167,7 +173,7 @@ public class Room {
             throw new IllegalArgumentException(ErrorConstants.NULL_ITEM);
         }
 
-        for (Item anItemList : player.getItems()) {
+        for (Item anItemList : player.getItemsArray()) {
             String itemName = anItemList.getName();
 
             if (itemInput.equalsIgnoreCase(itemName)) {

@@ -6,6 +6,9 @@ public class GameConstants {
     public static final String CANT_UNDERSTAND = "I don't understand ";
     public static final String NOTHING_IN_ROOM = "This room contains nothing";
     public static final String ROOM_CONTAINS = "This room contains ";
+    public static final String ROOM_CONTAINS_MONSTERS = "This room contains monsters ";
+
+    public static final String NO_MONSTERS = "This room has no monsters";
     public static final String FINAL_DESTINATION = "You have reached your final destination!";
     public static final String CAN_GO_TO = "From here you can go: ";
     public static final String EXITING_GAME = "Exiting Game";
@@ -15,6 +18,7 @@ public class GameConstants {
     public static final String CANT_TAKE = ", I can't take that.";
     public static final String NOTHING_OUTPUT = "nothing";
     public static final String INVALID_METHOD_IN_DUEL = "Can't use this method, not in duel";
+    public static final String OR = " or ";
     public static final String TIME_TO_DUEL = "You are now in a duel";
     public static final String DID = "You did ";
     public static final String RECEIVED = "You received ";
@@ -44,6 +48,7 @@ public class GameConstants {
     public static final String ATTACK_ITEM = "attack with ";
     public static final String DISENGAGE_INPUT = "disengage";
     public static final String STATUS_INPUT = "status";
+    public static final String ROOMINFO_INPUT = "roominfo";
     public static final String PLAYER = "Player: ";
     public static final String MONSTER = "Monster: ";
 

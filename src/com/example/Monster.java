@@ -66,22 +66,20 @@ public class Monster {
                 playerHealthOutput.append("_");
             }
 
-            playerHealthOutput.append("\n");
-
-            double monsterHealth = health;
-            StringBuilder monsterHealthOutput = new StringBuilder(MONSTER);
-            numberOfHealthBars = (int) Math.ceil((maxHealth / healthPerBar));
-
-            for (int j = 0; j < numberOfHealthBars; j++) {
-                if (monsterHealth > 0) {
-                    monsterHealth -= healthPerBar;
-                    monsterHealthOutput.append("#");
-                } else {
-                    monsterHealthOutput.append("_");
-                }
-            }
-            playerHealthOutput.append(monsterHealthOutput);
         }
+        playerHealthOutput.append("\n");
+        double monsterHealth = health;
+        StringBuilder monsterHealthOutput = new StringBuilder(MONSTER);
+        numberOfHealthBars = (int) Math.ceil((maxHealth / healthPerBar));
+        for (int j = 0; j < numberOfHealthBars; j++) {
+            if (monsterHealth > 0) {
+                monsterHealth -= healthPerBar;
+                monsterHealthOutput.append("#");
+            } else {
+                monsterHealthOutput.append("_");
+            }
+        }
+        playerHealthOutput.append(monsterHealthOutput);
         return playerHealthOutput.toString();
     }
 }

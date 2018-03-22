@@ -10,19 +10,33 @@ public class Adventure {
     private static Player player;
     private static Room currentRoom;
     private static Monster monster;
+    private static Scanner scanner;
 
     private static boolean inDuel = false;
 
-    public static void main(String[] args) {
+    public static void main() {
         adventureSetup();
+        while (!currentRoom.getName().equalsIgnoreCase(layout.getEndingRoom())) {
+            userInput(scanner);
+        }
+        System.out.println(GameConstants.FINAL_DESTINATION);
     }
 
-    public static void adventureSetup() {
+    private static void adventureSetup() {
         adventureSetupFromJson(JsonString.SIEBEL);
-        Scanner scanner = new Scanner(System.in);
+        scanner = new Scanner(System.in);
         player = layout.getPlayer();
+        player.setMaxHealth(player.getHealth());
         layout.setArrayList();
+        layout.setMonsterMaxHealth();
         currentRoom = layout.getRoomFromName(layout.getStartingRoom());
+
+        System.out.println(GameConstants.STARTING_ROOM + currentRoom.getName());
+        System.out.println(currentRoom.getDescription());
+        System.out.println(GameConstants.JOURNEY_BEGINS);
+        System.out.println(currentRoom.getItemsAvailable());
+        System.out.println(currentRoom.getMonstersAvailable());
+        System.out.println(currentRoom.getDirectionsAvailable());
     }
 
     /**
@@ -34,17 +48,32 @@ public class Adventure {
         layout = gson.fromJson(jsonFile, Layout.class);
     }
 
-    public static void userInput(Scanner scanner) {
+    private static void roomOutput() {
+        System.out.println(currentRoom.getDescription());
+        System.out.println(currentRoom.getItemsAvailable());
+        System.out.println(currentRoom.getMonstersAvailable());
+        System.out.println(currentRoom.getDirectionsAvailable());
+    }
+
+    private static void userInput(Scanner scanner) {
+        boolean regularCommandUnderstood;
+        boolean duelCommandUnderstood = false;
         String originalInput = scanner.nextLine();
         String input = originalInput.trim().replaceAll(" +", " ").toLowerCase();
         String[] inputArray = input.split("\\s+");
 
-        if (!regularCommands(inputArray) && !duelCommands(inputArray)) {
-            System.out.println(GameConstants.CANT_UNDERSTAND + originalInput);
-        }
-        regularCommands(inputArray);
+        regularCommandUnderstood = regularCommands(inputArray);
         if (inDuel) {
-            duelCommands(inputArray);
+            duelCommandUnderstood = duelCommands(inputArray);
+        }
+
+        if (!regularCommandUnderstood && !duelCommandUnderstood) {
+            if (input.equals(GameConstants.ATTACK_INPUT) || input.startsWith(GameConstants.ATTACK_ITEM) ||
+                    input.equals(GameConstants.DISENGAGE_INPUT) || input.equals(GameConstants.STATUS_INPUT)) {
+                System.out.println(GameConstants.INVALID_METHOD_IN_DUEL);
+            } else {
+                System.out.println(GameConstants.CANT_UNDERSTAND + originalInput);
+            }
         }
     }
 
@@ -78,6 +107,10 @@ public class Adventure {
                 System.out.println(player.getItemsList());
                 return true;
 
+            case GameConstants.ROOMINFO_INPUT:
+                roomOutput();
+                return true;
+
             default:
                 return false;
         }
@@ -91,13 +124,14 @@ public class Adventure {
                     monster = layout.getMonster(secondWord);
                     System.out.println(GameConstants.TIME_TO_DUEL);
                 } else {
-                    System.out.print(GameConstants.CANT_DUEL + secondWord);
+                    System.out.println(GameConstants.CANT_DUEL + secondWord);
                 }
                 return true;
 
             case GameConstants.GO_INPUT:
                 if (currentRoom.getDirection(secondWord) != null) {
                     currentRoom = layout.getRoomFromDirection(currentRoom.getDirection(secondWord));
+                    roomOutput();
                 } else {
                     System.out.println(GameConstants.CANT_GO + secondWord);
                 }
@@ -134,6 +168,7 @@ public class Adventure {
                     currentRoom.removeMonsterFromRoom(monster.getName());
                     inDuel = false;
                     monster = null;
+                    roomOutput(); // Output the room info if monster is dead
                 }
             } else {
                 System.out.println(GameConstants.CANT_ATTACK_WITH + itemName);
@@ -147,8 +182,7 @@ public class Adventure {
                     currentRoom.removeMonsterFromRoom(monster.getName());
                     inDuel = false;
                     monster = null;
-                } else {
-                    System.out.println(GameConstants.CANT_ATTACK + firstWord);
+                    roomOutput(); // Output the room info if monster is dead
                 }
                 return true;
 

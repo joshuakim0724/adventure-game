@@ -33,7 +33,6 @@ public class Layout {
     }
 
     public void setArrayList() {
-        System.out.println(rooms.length);
         player.setUpArrayList();
         for (Room room : rooms) {
             room.setUpArrayList();

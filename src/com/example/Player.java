@@ -39,12 +39,20 @@ public class Player {
         return level;
     }
 
+    public ArrayList<Item> getItemsArray() {
+        return itemsList;
+    }
+
     public double getExp() {
         return exp;
     }
 
     public double getMaxHealth() {
         return maxHealth;
+    }
+
+    public void setMaxHealth(double health) {
+        this.maxHealth = health;
     }
 
 
@@ -93,9 +101,9 @@ public class Player {
     }
 
     public String getPlayerInfo() {
-        String playerInfo = "Player Level: " + level +
-                "Player Attack: " + attack +
-                "Player Defense: " + defense +
+        String playerInfo = "Player Level: " + level + "\n" +
+                "Player Attack: " + attack + "\n" +
+                "Player Defense: " + defense + "\n" +
                 "Player Health: " + health;
 
         return playerInfo;
