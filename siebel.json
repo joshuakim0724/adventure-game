@@ -148,6 +148,7 @@
       "name": "SiebelNorthHallway",
       "description": "You are in the north hallway.  You can see Siebel 1112 and the door toward NCSA.",
       "monstersInRoom": ["Reaper"],
+      "items": [],
       "directions": [
         {
           "directionName": "South",
@@ -213,6 +214,7 @@
       "name": "Siebel1314",
       "description": "You are in Siebel 1314.  There are happy CS 126 students doing a code review.",
       "monstersInRoom": ["Mihir", "Code Reviewer"],
+      "items": [],
       "directions": [
         {
           "directionName": "North",

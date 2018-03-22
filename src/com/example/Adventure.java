@@ -8,26 +8,28 @@ public class Adventure {
 
     private static Layout layout;
     private static Player player;
-    private static Room room;
+    private static Room currentRoom;
     private static Monster monster;
 
     private static boolean inDuel = false;
 
     public static void main(String[] args) {
-
+        adventureSetup();
     }
 
     public static void adventureSetup() {
-        adventureSetupFromGson(GameConstants.SIEBEL);
+        adventureSetupFromJson(JsonString.SIEBEL);
         Scanner scanner = new Scanner(System.in);
         player = layout.getPlayer();
+        layout.setArrayList();
+        currentRoom = layout.getRoomFromName(layout.getStartingRoom());
     }
 
     /**
      * Reads the jsonFile from a String and Setups the Gson file
      * @param jsonFile is json String
      */
-    private static void adventureSetupFromGson(String jsonFile) {
+    private static void adventureSetupFromJson(String jsonFile) {
         Gson gson = new Gson();
         layout = gson.fromJson(jsonFile, Layout.class);
     }
@@ -84,7 +86,7 @@ public class Adventure {
     private static boolean twoWordRegularCommands(String firstWord, String secondWord) {
         switch (firstWord) {
             case GameConstants.DUEL_INPUT:
-                if (room.validDuel(secondWord)) {
+                if (currentRoom.validDuel(secondWord)) {
                     inDuel = true;
                     monster = layout.getMonster(secondWord);
                     System.out.println(GameConstants.TIME_TO_DUEL);
@@ -94,15 +96,15 @@ public class Adventure {
                 return true;
 
             case GameConstants.GO_INPUT:
-                if (room.getDirection(secondWord) != null) {
-                    room = layout.getRoomFromDirection(room.getDirection(secondWord));
+                if (currentRoom.getDirection(secondWord) != null) {
+                    currentRoom = layout.getRoomFromDirection(currentRoom.getDirection(secondWord));
                 } else {
                     System.out.println(GameConstants.CANT_GO + secondWord);
                 }
                 return true;
 
             case GameConstants.TAKE_INPUT:
-                if (room.takeItem(player, secondWord)) {
+                if (currentRoom.takeItem(player, secondWord)) {
                     System.out.println(GameConstants.PICKED_UP + secondWord);
                 } else {
                     System.out.println(GameConstants.CANT_TAKE_ITEM + secondWord);
@@ -110,7 +112,7 @@ public class Adventure {
                 return true;
 
             case GameConstants.DROP_INPUT:
-                if (room.dropItem(player, secondWord)) {
+                if (currentRoom.dropItem(player, secondWord)) {
                     System.out.println(GameConstants.DROPPED + secondWord);
                 } else {
                     System.out.println(GameConstants.CANT_DROP + secondWord);
@@ -129,7 +131,7 @@ public class Adventure {
             String itemName = input[2];
             if (player.isValidItem(itemName)) {
                 if (player.attackWithItem(monster, itemName)) {
-                    room.removeMonsterFromRoom(monster.getName());
+                    currentRoom.removeMonsterFromRoom(monster.getName());
                     inDuel = false;
                     monster = null;
                 }
@@ -142,7 +144,7 @@ public class Adventure {
         switch (firstWord) {
             case GameConstants.ATTACK_INPUT:
                 if (player.attack(monster)) {
-                    room.removeMonsterFromRoom(monster.getName());
+                    currentRoom.removeMonsterFromRoom(monster.getName());
                     inDuel = false;
                     monster = null;
                 } else {

@@ -32,6 +32,14 @@ public class Layout {
         return monsters;
     }
 
+    public void setArrayList() {
+        System.out.println(rooms.length);
+        player.setUpArrayList();
+        for (Room room : rooms) {
+            room.setUpArrayList();
+        }
+    }
+
     public void setMonsterMaxHealth() {
         for (Monster monster : monsters) {
             monster.setMaxHealth(monster.getHealth());
@@ -56,6 +64,15 @@ public class Layout {
     public Room getRoomFromDirection(Direction direction) {
         for (Room room : rooms) {
             if (room.getName().equals(direction.getRoom())) {
+                return room;
+            }
+        }
+        return null;
+    }
+
+    public Room getRoomFromName(String roomName) {
+        for (Room room : rooms) {
+            if (room.getName().equals(roomName)) {
                 return room;
             }
         }

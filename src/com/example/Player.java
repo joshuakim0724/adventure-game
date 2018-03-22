@@ -49,7 +49,9 @@ public class Player {
 
 
     public void setUpArrayList() {
-        Collections.addAll(itemsList, items);
+        if (items != null) {
+            Collections.addAll(itemsList, items);
+        }
     }
 
     public boolean addItem(Item item) {

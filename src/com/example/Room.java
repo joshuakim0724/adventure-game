@@ -8,8 +8,8 @@ public class Room {
     private Item[] items;
     private String[] monstersInRoom;
 
-    private ArrayList<Item> itemsArrayList = new ArrayList<>();
-    private ArrayList<String> monstersArrayList = new ArrayList<>();
+    private ArrayList<Item> itemsArrayList = new ArrayList<Item>();
+    private ArrayList<String> monstersArrayList = new ArrayList<String>();
 
     public String getName() {
         return name;
@@ -32,8 +32,13 @@ public class Room {
     }
 
     public void setUpArrayList() {
-        Collections.addAll(itemsArrayList, items);
-        Collections.addAll(monstersArrayList, monstersInRoom);
+        if (items != null) {
+            Collections.addAll(itemsArrayList, items);
+            System.out.println(itemsArrayList.size());
+        }
+        if (monstersInRoom != null) {
+            Collections.addAll(monstersArrayList, monstersInRoom);
+        }
     }
 
     public String getDirectionsAvailable() {
