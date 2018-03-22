@@ -103,9 +103,13 @@ public class RoomTest {
         assertTrue(room1.dropItem(player, "coin"));
         assertFalse(room1.dropItem(player, "coin"));
     }
-    
+
     // Tested within other methods
     @Test
     public void removeMonsterFromRoom() {
+        Room room1 = rooms[0];
+
+        assertTrue(room1.removeMonsterFromRoom("Murlock1"));
+        assertFalse(room1.removeMonsterFromRoom("murlock1"));
     }
 }

@@ -40,12 +40,9 @@ public class GameConstants {
     public static final String QUIT_GAME = "quit";
     public static final String EXIT_GAME = "exit";
     public static final String TAKE_INPUT = "take";
-    public static final String STEAL_INPUT = "steal";
     public static final String LIST_INPUT = "list";
     public static final String DROP_INPUT = "drop";
     public static final String GO_INPUT = "go";
-    public static final String WALK_INPUT = "walk";
-    public static final String RUN_INPUT = "run";
     public static final String DUEL_INPUT = "duel";
     public static final String ATTACK_INPUT = "attack";
     public static final String ATTACK_ITEM = "attack with ";
