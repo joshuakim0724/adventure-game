@@ -31,7 +31,7 @@ public class Layout {
     /**
      * Sets up all the arrayList for Rooms and Player
      */
-    public void setArrayList() {
+    public void setupArrayList() {
         player.setUpArrayList();
         for (Room room : rooms) {
             room.setUpArrayList();
@@ -68,6 +68,9 @@ public class Layout {
      * @return Room that is found from the given direction, null otherwise
      */
     public Room getRoomFromDirection(Direction direction) {
+        if (direction == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_DIRECTION);
+        }
         for (Room room : rooms) {
             if (room.getName().equals(direction.getRoom())) {
                 return room;

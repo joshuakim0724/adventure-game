@@ -33,7 +33,7 @@ public class Adventure {
         scanner = new Scanner(System.in);
         player = layout.getPlayer();
         player.setMaxHealth(player.getHealth());
-        layout.setArrayList();
+        layout.setupArrayList();
         layout.setMonsterMaxHealth();
         currentRoom = layout.getRoomFromName(layout.getStartingRoom());
 
