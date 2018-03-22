@@ -7,9 +7,9 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class LayoutTest {
-    Layout setup;
-    Room[] rooms;
-    Monster[] monsters;
+    private Layout setup;
+    private Room[] rooms;
+    private Monster[] monsters;
 
     @Before
     public void setUp() throws Exception {
@@ -58,7 +58,7 @@ public class LayoutTest {
     }
 
     @Test
-    public void nullRoomItem() {
+    public void nullDirectionInput() {
         String str = "";
         try {
             setup.getRoomFromDirection(null);

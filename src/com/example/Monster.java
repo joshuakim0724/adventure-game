@@ -46,6 +46,9 @@ public class Monster {
      * @param player which monsters health bar you are displaying
      */
     public String displayStatus(Player player) {
+        if (player == null) {
+            throw new IllegalArgumentException(ErrorConstants.NULL_PLAYER);
+        }
         // Player health output
         double playerHealth = player.getHealth();
         StringBuilder playerHealthOutput = new StringBuilder(PLAYER);
