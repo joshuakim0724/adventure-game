@@ -22,6 +22,7 @@ public class MonsterTest {
         player = layout.getPlayer();
         player.setMaxHealth(player.getHealth());
     }
+
     @Test
     public void setMaxHealth() {
         Monster monster = monsters[0];

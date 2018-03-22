@@ -99,17 +99,17 @@ public class Player {
      */
     public String getItemsList() {
         StringBuilder itemOutput = new StringBuilder(GameConstants.CARRYING);
-        if (items == null || items.length == 0) {
+        if (itemsList.size() == 0) {
             itemOutput.append(GameConstants.NOTHING_OUTPUT);
             return itemOutput.toString();
         }
 
         for (int i = 0; i < itemsList.size(); i++) {
             if (i != itemsList.size() - 1) {
-                itemOutput.append(itemsList.get(i));
+                itemOutput.append(itemsList.get(i).getName());
                 itemOutput.append(", ");
             } else {
-                itemOutput.append(itemsList.get(i));
+                itemOutput.append(itemsList.get(i).getName());
             }
         }
         return itemOutput.toString();
