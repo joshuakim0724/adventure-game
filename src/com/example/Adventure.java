@@ -28,7 +28,7 @@ public class Adventure {
     /**
      * This is used to setup the adventure before the game starts
      */
-    private static void adventureSetup() {
+    public static void adventureSetup() {
         adventureSetupFromJson(JsonString.SIEBEL);
         scanner = new Scanner(System.in);
         player = layout.getPlayer();
@@ -190,7 +190,13 @@ public class Adventure {
         String firstWord = input[0];
         // Attack with Item Command, Max length input can be is 3
         if (input.length == 3) {
+            String secondWord = input[1];
             String itemName = input[2];
+            // Makes sure input is 'attack with'
+            if (!firstWord.equals("attack") || !secondWord.equals("with")) {
+                return false;
+            }
+            // Checks if item is valid
             if (player.isValidItem(itemName)) {
                 if (player.attackWithItem(monster, itemName)) {
                     currentRoom.removeMonsterFromRoom(monster.getName());
