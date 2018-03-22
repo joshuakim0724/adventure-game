@@ -15,14 +15,18 @@ public class Player {
     private double exp = 0;
     private double maxHealth;
 
-    public String getName() {
-        return name;
-    }
+    private static final String DONT_HAVE = "I don't have ";
+    private static final String PLEVEL = "Player Level: ";
+    private static final String PATTACK = "Player Attack: ";
+    private static final String PDEFENSE = "Player Attack: ";
+    private static final String PHEALTH = "Player Attack: ";
 
-    public Item[] getItems() {
-        return items;
-    }
+    private static final int LEVEL1_EXP = 25;
+    private static final int LEVEL2_EXP = 50;
+    private static final double EXP_MODIFIER = 1.1;
 
+
+    // Getters/Setters
     public double getAttack() {
         return attack;
     }
@@ -35,9 +39,7 @@ public class Player {
         return health;
     }
 
-    public int getLevel() {
-        return level;
-    }
+    public double getLevel() { return level; }
 
     public ArrayList<Item> getItemsArray() {
         return itemsList;
@@ -55,22 +57,32 @@ public class Player {
         this.maxHealth = health;
     }
 
-
+    /**
+     * This method will setup the ArrayList using the given array
+     */
     public void setUpArrayList() {
         if (items != null) {
             Collections.addAll(itemsList, items);
         }
     }
 
+    /**
+     * This method will add an item to the Player ArrayList
+     * @param item that is going to be added
+     * @return if can add the item
+     */
     public boolean addItem(Item item) {
         if (item == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_ITEM);
         }
-        itemsList.add(item);
-
-        return true;
+        return (itemsList.add(item));
     }
 
+    /**
+     * This method will remove an item from the Player ArrayList
+     * @param item that is goign to be removed
+     * @return If the item is valid to remove true, false if not
+     */
     public boolean removeItem(Item item) {
         if (item == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_ITEM);
@@ -82,6 +94,9 @@ public class Player {
         return true;
     }
 
+    /**
+     * @return a String of all the items the player is carrying
+     */
     public String getItemsList() {
         StringBuilder itemOutput = new StringBuilder(GameConstants.CARRYING);
         if (items == null || items.length == 0) {
@@ -100,11 +115,14 @@ public class Player {
         return itemOutput.toString();
     }
 
+    /**
+     * @return a String of the player information of level, attack, defense, health
+     */
     public String getPlayerInfo() {
-        String playerInfo = "Player Level: " + level + "\n" +
-                "Player Attack: " + attack + "\n" +
-                "Player Defense: " + defense + "\n" +
-                "Player Health: " + health;
+        String playerInfo = PLEVEL + level + "\n" +
+                PATTACK + attack + "\n" +
+                PDEFENSE + defense + "\n" +
+                PHEALTH + health;
 
         return playerInfo;
     }
@@ -116,13 +134,13 @@ public class Player {
      */
     public double experienceNeeded(int playerLevel) {
         if (playerLevel == 1) {
-            return 25;
+            return LEVEL1_EXP;
         }
         if (playerLevel == 2) {
-            return 50;
+            return LEVEL2_EXP;
         }
         return (experienceNeeded(playerLevel - 1) +
-                experienceNeeded(playerLevel - 2)) * 1.1;
+                experienceNeeded(playerLevel - 2)) * EXP_MODIFIER;
     }
 
     /**
@@ -141,6 +159,11 @@ public class Player {
         level += 1;
     }
 
+    /**
+     * This method is used to attack a monster
+     * @param monster that is attacked by the player
+     * @return true if the monster is dead, false if monster is still alive
+     */
     public boolean attack(Monster monster) {
         if (monster == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_MONSTER);
@@ -176,6 +199,12 @@ public class Player {
         return false;
     }
 
+    /**
+     * This method is used to attack a monster with an item
+     * @param monster that is going be attacked by player
+     * @param itemName is the item that is going to be used by the player
+     * @return false if
+     */
     public boolean attackWithItem(Monster monster, String itemName) {
         if (monster == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_MONSTER);
@@ -184,7 +213,7 @@ public class Player {
         if (getItemIndex(itemName) != -1) {
             item = itemsList.get(getItemIndex(itemName));
         } else {
-            System.out.println("I don't have " + itemName);
+            System.out.println(DONT_HAVE + itemName);
             return false;
         }
 
@@ -234,6 +263,11 @@ public class Player {
         return false;
     }
 
+    /**
+     * Will get the index of the Item from the itemName
+     * @param itemInput is the name of the item
+     * @return the index from the ArrayList, -1 if can't be found
+     */
     public int getItemIndex(String itemInput) {
         for (int i = 0; i < itemsList.size(); i++) {
             String itemName = itemsList.get(i).getName();
@@ -244,6 +278,12 @@ public class Player {
         return -1;
     }
 
+    /**
+     * Helper method for attack methods
+     * @param monster getting attacked
+     * @param monsterHealth health of the monster
+     * @return true if the monster is dead, false if not
+     */
     private boolean wonDuel(Monster monster, double monsterHealth) {
         if (monsterHealth < 0) {
             System.out.println(GameConstants.WON_DUEL + monster.getName());
@@ -255,6 +295,9 @@ public class Player {
         return false;
     }
 
+    /**
+     * Simple rounding method
+     */
     private static double roundNumber(double number) {
         return Math.round(number * 100) / 100;
     }

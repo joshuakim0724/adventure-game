@@ -12,10 +12,6 @@ public class Layout {
         return startingRoom;
     }
 
-    public void setStartingRoom(String room) {
-        startingRoom = room;
-    }
-
     public String getEndingRoom() {
         return endingRoom;
     }
@@ -32,6 +28,9 @@ public class Layout {
         return monsters;
     }
 
+    /**
+     * Sets up all the arrayList for Rooms and Player
+     */
     public void setArrayList() {
         player.setUpArrayList();
         for (Room room : rooms) {
@@ -39,6 +38,9 @@ public class Layout {
         }
     }
 
+    /**
+     * Used to set the max health of all the monsters
+     */
     public void setMonsterMaxHealth() {
         for (Monster monster : monsters) {
             monster.setMaxHealth(monster.getHealth());
@@ -60,6 +62,11 @@ public class Layout {
         return null;
     }
 
+    /**
+     * Gets the room from the direction given
+     * @param direction that user will input
+     * @return Room that is found from the given direction, null otherwise
+     */
     public Room getRoomFromDirection(Direction direction) {
         for (Room room : rooms) {
             if (room.getName().equals(direction.getRoom())) {
@@ -69,6 +76,11 @@ public class Layout {
         return null;
     }
 
+    /**
+     * Gets the room from the direction given
+     * @param roomName that user will input
+     * @return Room that is found from the given name, null otherwise
+     */
     public Room getRoomFromName(String roomName) {
         for (Room room : rooms) {
             if (room.getName().equals(roomName)) {

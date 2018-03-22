@@ -31,6 +31,9 @@ public class Room {
         return monstersInRoom;
     }
 
+    /**
+     * This will setup the Items ArrayList and Monsters ArrayList
+     */
     public void setUpArrayList() {
         if (items != null) {
             Collections.addAll(itemsArrayList, items);
@@ -40,6 +43,10 @@ public class Room {
         }
     }
 
+    /**
+     * @return all the available directions from this room
+     * Will return Empty string if monsters exist
+     */
     public String getDirectionsAvailable() {
         if (monstersExist()) {
             return "";
@@ -57,6 +64,10 @@ public class Room {
         return directionList.toString();
     }
 
+    /**
+     * @return all the available Items in this room
+     * Will return Empty string if monsters exist
+     */
     public String getItemsAvailable() {
         StringBuilder itemList = new StringBuilder(GameConstants.ROOM_CONTAINS);
 
@@ -75,10 +86,17 @@ public class Room {
         return itemList.toString();
     }
 
+    /**
+     * Helper method used to see if monsters exist
+     * @return true if monsters exist (arrayList.size() is greater than 0)
+     */
     public boolean monstersExist() {
         return monstersArrayList.size() != 0;
     }
 
+    /**
+     * @return all the monsters in the room
+     */
     public String getMonstersAvailable() {
         StringBuilder monsterList = new StringBuilder(GameConstants.ROOM_CONTAINS_MONSTERS);
 

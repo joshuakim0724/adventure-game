@@ -14,6 +14,9 @@ public class Adventure {
 
     private static boolean inDuel = false;
 
+    /**
+     * Main function. Ends if player gets to ending room
+     */
     public static void main() {
         adventureSetup();
         while (!currentRoom.getName().equalsIgnoreCase(layout.getEndingRoom())) {
@@ -22,6 +25,9 @@ public class Adventure {
         System.out.println(GameConstants.FINAL_DESTINATION);
     }
 
+    /**
+     * This is used to setup the adventure before the game starts
+     */
     private static void adventureSetup() {
         adventureSetupFromJson(JsonString.SIEBEL);
         scanner = new Scanner(System.in);
@@ -32,11 +38,8 @@ public class Adventure {
         currentRoom = layout.getRoomFromName(layout.getStartingRoom());
 
         System.out.println(GameConstants.STARTING_ROOM + currentRoom.getName());
-        System.out.println(currentRoom.getDescription());
         System.out.println(GameConstants.JOURNEY_BEGINS);
-        System.out.println(currentRoom.getItemsAvailable());
-        System.out.println(currentRoom.getMonstersAvailable());
-        System.out.println(currentRoom.getDirectionsAvailable());
+        roomOutput();
     }
 
     /**
@@ -48,6 +51,9 @@ public class Adventure {
         layout = gson.fromJson(jsonFile, Layout.class);
     }
 
+    /**
+     * Prints out Description, Items in room, Monsters in room, and Directions if monsters don't exist
+     */
     private static void roomOutput() {
         System.out.println(currentRoom.getDescription());
         System.out.println(currentRoom.getItemsAvailable());
@@ -55,6 +61,9 @@ public class Adventure {
         System.out.println(currentRoom.getDirectionsAvailable());
     }
 
+    /**
+     * Uses Scanner. Depending on input it will use different methods
+     */
     private static void userInput(Scanner scanner) {
         boolean regularCommandUnderstood;
         boolean duelCommandUnderstood = false;
@@ -77,7 +86,10 @@ public class Adventure {
         }
     }
 
-    private static boolean regularCommands(String[] input) {
+    /**
+     * Non duel commands
+     */
+    public static boolean regularCommands(String[] input) {
         String firstWord = input[0];
 
         if (input.length == 1) {
@@ -89,7 +101,12 @@ public class Adventure {
         return false;
     }
 
-    private static boolean oneWordRegularCommands(String firstWord) {
+    /**
+     * Regular commands that are one word
+     * @param firstWord is the user command
+     * @return true if valid input, false if not
+     */
+    public static boolean oneWordRegularCommands(String firstWord) {
         switch (firstWord) {
             case GameConstants.QUIT_GAME:
                 System.out.println(GameConstants.EXITING_GAME);
@@ -116,7 +133,13 @@ public class Adventure {
         }
     }
 
-    private static boolean twoWordRegularCommands(String firstWord, String secondWord) {
+    /**
+     * Regular commands that are two words
+     * @param firstWord user first command
+     * @param secondWord user second command
+     * @return true if valid inputs, false otherwise
+     */
+    public static boolean twoWordRegularCommands(String firstWord, String secondWord) {
         switch (firstWord) {
             case GameConstants.DUEL_INPUT:
                 if (currentRoom.validDuel(secondWord)) {
@@ -158,7 +181,12 @@ public class Adventure {
         }
     }
 
-    private static boolean duelCommands(String[] input) {
+    /**
+     * Duel commands
+     * @param input user input
+     * @return true if valid duel command, false if not
+     */
+    public static boolean duelCommands(String[] input) {
         String firstWord = input[0];
         // Attack with Item Command, Max length input can be is 3
         if (input.length == 3) {

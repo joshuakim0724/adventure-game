@@ -33,14 +33,6 @@ public class Monster {
         return maxHealth;
     }
 
-    public void setAttack(double attack) {
-        this.attack = attack;
-    }
-
-    public void setDefense(double defense) {
-        this.defense = defense;
-    }
-
     public void setHealth(double health) {
         this.health = health;
     }
@@ -54,6 +46,7 @@ public class Monster {
      * @param player which monsters health bar you are displaying
      */
     public String displayStatus(Player player) {
+        // Player health output
         double playerHealth = player.getHealth();
         StringBuilder playerHealthOutput = new StringBuilder(PLAYER);
         int numberOfHealthBars = (int) Math.ceil((player.getMaxHealth() / healthPerBar));
@@ -68,6 +61,8 @@ public class Monster {
 
         }
         playerHealthOutput.append("\n");
+
+        // Monster health output
         double monsterHealth = health;
         StringBuilder monsterHealthOutput = new StringBuilder(MONSTER);
         numberOfHealthBars = (int) Math.ceil((maxHealth / healthPerBar));
@@ -80,6 +75,7 @@ public class Monster {
             }
         }
         playerHealthOutput.append(monsterHealthOutput);
+
         return playerHealthOutput.toString();
     }
 }

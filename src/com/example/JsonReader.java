@@ -3,6 +3,7 @@ package com.example;
 import com.google.gson.Gson;
 
 public class JsonReader {
+
     /**
      * Initalizer from a file
      * @param jsonFile String of the file that is being read
