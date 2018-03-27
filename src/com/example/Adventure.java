@@ -3,6 +3,9 @@ package com.example;
 import com.google.gson.Gson;
 
 import java.util.Scanner;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Adventure {
 
@@ -13,7 +16,8 @@ public class Adventure {
     private static Scanner scanner;
 
     private static boolean inDuel = false;
-
+    private static List<String> duelInputArray = new ArrayList<>(Arrays.asList(
+            GameConstants.ATTACK_INPUT, GameConstants.DISENGAGE_INPUT,GameConstants.STATUS_INPUT));
     /**
      * Main function. Ends if player gets to ending room
      */
@@ -78,8 +82,7 @@ public class Adventure {
         }
 
         if (!regularCommandUnderstood && !duelCommandUnderstood) {
-            if (input.equals(GameConstants.ATTACK_INPUT) || input.startsWith(GameConstants.ATTACK_ITEM) ||
-                    input.equals(GameConstants.DISENGAGE_INPUT) || input.equals(GameConstants.STATUS_INPUT)) {
+            if (duelInputArray.contains(input) || input.startsWith(GameConstants.ATTACK_ITEM)) {
                 System.out.println(GameConstants.INVALID_METHOD_IN_DUEL);
             } else {
                 System.out.println(GameConstants.CANT_UNDERSTAND + originalInput);
