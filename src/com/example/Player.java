@@ -168,8 +168,16 @@ public class Player {
         if (monster == null) {
             throw new IllegalArgumentException(ErrorConstants.NULL_MONSTER);
         }
+
+        double damageDealt;
+
         // Player Attack
-        double damageDealt = roundNumber(attack - monster.getDefense());
+        if (criticalHit()) {
+            damageDealt = roundNumber(attack * 2 - monster.getDefense());
+        } else {
+            damageDealt = roundNumber(attack - monster.getDefense());
+        }
+
         double monsterHealth = monster.getHealth() - damageDealt;
         // Not letting player do negative damage
         if (damageDealt < 0) {
@@ -216,9 +224,15 @@ public class Player {
             System.out.println(DONT_HAVE + itemName);
             return false;
         }
+        double damageDealt;
 
         // Player Attack
-        double damageDealt = roundNumber(attack + item.getDamage() - monster.getDefense());
+        if (criticalHit()) {
+            damageDealt = roundNumber(attack * 2 + item.getDamage() - monster.getDefense());
+        } else {
+            damageDealt = roundNumber(attack - monster.getDefense());
+        }
+
         double monsterHealth = monster.getHealth() - damageDealt;
         // Not letting player do negative damage
         if (damageDealt < 0) {
@@ -320,5 +334,15 @@ public class Player {
             }
         }
         exp = totalExpGained; // Left over exp;
+    }
+
+    /**
+     * This will return true if it is a critical hit || Extra Feature
+     * @return true if 25% chance to crit, false if not
+     */
+    private boolean criticalHit() {
+        int number = (int)(Math.random() * 4);
+
+        return number < 1;
     }
 }

@@ -72,6 +72,7 @@ public class Adventure {
         String[] inputArray = input.split("\\s+");
 
         regularCommandUnderstood = regularCommands(inputArray);
+
         if (inDuel) {
             duelCommandUnderstood = duelCommands(inputArray);
         }

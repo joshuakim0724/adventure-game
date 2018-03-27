@@ -149,7 +149,8 @@ public class Room {
         }
         return false;
     }
-    /** +
+
+    /**
      * This method makes sure the item is a valid pickup
      * @param itemInput This is the String input that the user will enter into the scanner
      * @return true if it is valid, false if it is not. Boolean only for testing purposes
